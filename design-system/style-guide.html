@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design System Style Guide</title>
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="prototype-utils.css" />
+  <style>
+    .guide {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-5);
+    }
+    .guide-section {
+      margin-bottom: var(--space-6);
+    }
+    .guide-section > h2 {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .guide-section > h3 {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      margin: var(--space-5) 0 var(--space-3);
+    }
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-3);
+    }
+    .swatch {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      font-size: var(--font-size-xs);
+    }
+    .swatch-fill {
+      height: 56px;
+    }
+    .swatch-label {
+      padding: var(--space-2);
+      background: var(--color-bg);
+    }
+    .swatch-label code {
+      display: block;
+      color: var(--color-fg-muted);
+    }
+    .scale-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-2);
+    }
+    .scale-row code {
+      width: 110px;
+      font-size: var(--font-size-xs);
+      color: var(--color-fg-muted);
+    }
+    .scale-bar {
+      background: var(--color-primary);
+      height: 16px;
+    }
+    .radius-box {
+      width: 56px;
+      height: 56px;
+      background: var(--color-primary-subtle);
+      border: 1px solid var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .component-demo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-3);
+    }
+    .overlay-demo {
+      position: relative;
+      height: 180px;
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .overlay-demo .backdrop,
+    .overlay-demo .drawer,
+    .overlay-demo .modal,
+    .overlay-demo .toast,
+    .overlay-demo .tooltip {
+      position: absolute;
+    }
+    .guide-prose p {
+      font-size: var(--font-size-md);
+      color: var(--color-fg);
+      line-height: 1.6;
+    }
+    .guide-prose li {
+      font-size: var(--font-size-sm);
+      color: var(--color-fg);
+      line-height: 1.6;
+      margin-bottom: var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <div class="guide">
+    <header class="guide-section">
+      <h1 style="font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);">Design System Style Guide</h1>
+      <p class="guide-prose" style="margin:0;">Tokens, utility classes and the standard component set, followed by this product's UI guidelines.</p>
+    </header>
+
+    <!-- COLORS -->
+    <section class="guide-section">
+      <h2>Colors</h2>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-bg); border-bottom: 1px solid var(--color-border);"></div><div class="swatch-label">color-bg<code>#ffffff</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-bg-subtle);"></div><div class="swatch-label">color-bg-subtle<code>#f8fafc</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-bg-inset);"></div><div class="swatch-label">color-bg-inset<code>#f1f5f9</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-fg);"></div><div class="swatch-label">color-fg<code>#1e293b</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-fg-muted);"></div><div class="swatch-label">color-fg-muted<code>#64748b</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-fg-inverse); border-bottom: 1px solid var(--color-border);"></div><div class="swatch-label">color-fg-inverse<code>#ffffff</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-primary);"></div><div class="swatch-label">color-primary<code>#2563eb</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-primary-hover);"></div><div class="swatch-label">color-primary-hover<code>#1d4ed8</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-primary-subtle);"></div><div class="swatch-label">color-primary-subtle<code>#dbeafe</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-border);"></div><div class="swatch-label">color-border<code>#e2e8f0</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-border-strong);"></div><div class="swatch-label">color-border-strong<code>#cbd5e1</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-success);"></div><div class="swatch-label">color-success<code>#16a34a</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-success-subtle);"></div><div class="swatch-label">color-success-subtle<code>#dcfce7</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-warning);"></div><div class="swatch-label">color-warning<code>#d97706</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-warning-subtle);"></div><div class="swatch-label">color-warning-subtle<code>#fef3c7</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-danger);"></div><div class="swatch-label">color-danger<code>#dc2626</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-danger-subtle);"></div><div class="swatch-label">color-danger-subtle<code>#fee2e2</code></div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--color-overlay);"></div><div class="swatch-label">color-overlay<code>#0f172a @ 50%</code></div></div>
+      </div>
+
+      <h3>Contrast check</h3>
+      <div class="component-demo" style="background: var(--color-bg); color: var(--color-fg);">
+        color-fg on color-bg — body text sample (meets WCAG AA 4.5:1)
+      </div>
+    </section>
+
+    <!-- SPACING -->
+    <section class="guide-section">
+      <h2>Spacing</h2>
+      <div class="scale-row"><code>space-1 / 4px</code><div class="scale-bar" style="width: var(--space-1);"></div></div>
+      <div class="scale-row"><code>space-2 / 8px</code><div class="scale-bar" style="width: var(--space-2);"></div></div>
+      <div class="scale-row"><code>space-3 / 12px</code><div class="scale-bar" style="width: var(--space-3);"></div></div>
+      <div class="scale-row"><code>space-4 / 16px</code><div class="scale-bar" style="width: var(--space-4);"></div></div>
+      <div class="scale-row"><code>space-5 / 24px</code><div class="scale-bar" style="width: var(--space-5);"></div></div>
+      <div class="scale-row"><code>space-6 / 32px</code><div class="scale-bar" style="width: var(--space-6);"></div></div>
+    </section>
+
+    <!-- RADII -->
+    <section class="guide-section">
+      <h2>Radii</h2>
+      <div class="cluster">
+        <div class="radius-box" style="border-radius: var(--radius-sm);">sm</div>
+        <div class="radius-box" style="border-radius: var(--radius-md);">md</div>
+        <div class="radius-box" style="border-radius: var(--radius-lg);">lg</div>
+        <div class="radius-box" style="border-radius: var(--radius-full);">full</div>
+      </div>
+    </section>
+
+    <!-- TYPOGRAPHY -->
+    <section class="guide-section">
+      <h2>Typography</h2>
+      <p style="font-size: var(--font-size-xs);">font-size-xs — 12px captions</p>
+      <p style="font-size: var(--font-size-sm);">font-size-sm — 13px dense UI text</p>
+      <p style="font-size: var(--font-size-md);">font-size-md — 15px body text</p>
+      <p style="font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold);">font-size-lg — 20px section heading</p>
+      <p style="font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold);">font-size-xl — 24px page title</p>
+      <p style="font-family: var(--font-family-sans);">font-family-sans — Inter, system-ui, sans-serif</p>
+      <p style="font-family: var(--font-family-mono);">font-family-mono — REC-2026-00842</p>
+      <p style="font-weight: var(--font-weight-regular);">font-weight-regular (400)</p>
+      <p style="font-weight: var(--font-weight-medium);">font-weight-medium (500)</p>
+      <p style="font-weight: var(--font-weight-semibold);">font-weight-semibold (600)</p>
+    </section>
+
+    <!-- SHADOWS -->
+    <section class="guide-section">
+      <h2>Shadows</h2>
+      <div class="cluster-lg">
+        <div class="card" style="box-shadow: var(--shadow-sm); width: 160px; text-align: center;">shadow-sm</div>
+        <div class="card" style="box-shadow: var(--shadow-md); width: 160px; text-align: center;">shadow-md</div>
+      </div>
+    </section>
+
+    <!-- COMPONENT ALIASES -->
+    <section class="guide-section">
+      <h2>Component-scoped aliases</h2>
+      <div class="swatch-grid">
+        <div class="swatch"><div class="swatch-fill" style="background: var(--button-primary-background);"></div><div class="swatch-label">button-primary-background → color-primary</div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--button-danger-background);"></div><div class="swatch-label">button-danger-background → color-danger</div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--card-default-background); border: 1px solid var(--card-default-border);"></div><div class="swatch-label">card-default-border → color-border</div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--input-default-background); border: 1px solid var(--input-default-border);"></div><div class="swatch-label">input-default-border → color-border-strong</div></div>
+        <div class="swatch"><div class="swatch-fill" style="background: var(--badge-neutral-background);"></div><div class="swatch-label">badge-neutral-background → color-bg-inset</div></div>
+      </div>
+    </section>
+
+    <!-- BUTTONS -->
+    <section class="guide-section">
+      <h2>Buttons</h2>
+      <div class="component-demo">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-secondary">Secondary</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-danger">Danger</button>
+        <button class="btn btn-primary" disabled>Disabled</button>
+      </div>
+      <div class="component-demo">
+        <button class="btn btn-primary btn-sm">Small</button>
+        <button class="btn btn-primary">Default</button>
+        <button class="btn btn-primary btn-lg">Large</button>
+        <button class="btn btn-secondary btn-icon" aria-label="Icon button">★</button>
+      </div>
+    </section>
+
+    <!-- FORM CONTROLS -->
+    <section class="guide-section">
+      <h2>Form controls</h2>
+      <div class="component-demo" style="flex-direction: column; align-items: stretch;">
+        <div class="grid grid-2">
+          <div class="field">
+            <label class="field-label" for="sg-input">Record title</label>
+            <input class="input" id="sg-input" type="text" placeholder="e.g. Vendor agreement" />
+            <span class="field-hint">Hint: shown under a valid field.</span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="sg-input-invalid">Due date</label>
+            <input class="input is-invalid" id="sg-input-invalid" type="text" value="13/40/2026" />
+            <span class="field-error">Enter a date before the due date.</span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="sg-textarea">Notes</label>
+            <textarea class="textarea" id="sg-textarea" placeholder="Add context…"></textarea>
+          </div>
+          <div class="field">
+            <label class="field-label" for="sg-select">Status</label>
+            <select class="select" id="sg-select">
+              <option>Draft</option>
+              <option>Pending</option>
+              <option>Approved</option>
+            </select>
+          </div>
+        </div>
+        <div class="cluster-lg" style="margin-top: var(--space-3);">
+          <label class="cluster"><input class="checkbox" type="checkbox" checked /> Checkbox</label>
+          <label class="cluster"><input class="radio" type="radio" name="sg-radio" checked /> Radio</label>
+          <label class="cluster"><input class="switch" type="checkbox" checked /> Switch</label>
+          <label class="cluster"><input class="input" style="width: auto;" disabled value="Disabled" /></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- DROPDOWN / MENU -->
+    <section class="guide-section">
+      <h2>Dropdown &amp; menu</h2>
+      <div class="component-demo">
+        <div class="dropdown">
+          <button class="btn btn-secondary" data-menu="sg-dropdown-menu">Filter status ▾</button>
+          <div class="dropdown-menu" id="sg-dropdown-menu">
+            <button class="dropdown-item" aria-checked="true">All records</button>
+            <button class="dropdown-item">Draft</button>
+            <button class="dropdown-item">Approved</button>
+          </div>
+        </div>
+        <div class="menu" style="width: 200px;">
+          <button class="menu-item">Export CSV</button>
+          <button class="menu-item">Duplicate</button>
+          <button class="menu-item">Archive</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABS / ACCORDION -->
+    <section class="guide-section">
+      <h2>Tabs &amp; accordion</h2>
+      <div class="tabs">
+        <button class="tab" aria-selected="true">Details</button>
+        <button class="tab" aria-selected="false">History</button>
+        <button class="tab" aria-selected="false">Documents</button>
+      </div>
+      <div class="accordion" style="margin-top: var(--space-4);">
+        <div class="accordion-item">
+          <button class="accordion-trigger">Approval history</button>
+          <div class="accordion-panel">Approved by J. Rivera on 2026-09-02.</div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger">Linked tasks</button>
+          <div class="accordion-panel" hidden>No linked tasks.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARD / BADGE / CHIP / AVATAR / DIVIDER -->
+    <section class="guide-section">
+      <h2>Card, badge, chip, avatar, divider</h2>
+      <div class="card" style="max-width: 360px;">
+        <h3 class="card-title">Vendor Agreement #4821</h3>
+        <p style="color: var(--color-fg-muted); font-size: var(--font-size-sm); margin: 0 0 var(--space-3);">Updated 2 hours ago</p>
+        <div class="cluster">
+          <span class="badge badge-success">Approved</span>
+          <span class="badge badge-warning">Pending</span>
+          <span class="badge badge-danger">Rejected</span>
+          <span class="badge">Neutral</span>
+        </div>
+        <hr class="divider" />
+        <div class="cluster">
+          <span class="avatar">JR</span>
+          <span class="chip">finance</span>
+          <span class="chip">quarterly</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- OVERLAYS -->
+    <section class="guide-section">
+      <h2>Overlays</h2>
+      <h3>Drawer</h3>
+      <div class="overlay-demo">
+        <div class="backdrop is-open" style="position: absolute;"></div>
+        <div class="drawer is-open" style="position: absolute; width: 60%;">
+          <h3 class="card-title">Record detail</h3>
+          <p style="font-size: var(--font-size-sm); color: var(--color-fg-muted);">Drawer content.</p>
+        </div>
+      </div>
+      <h3>Modal</h3>
+      <div class="overlay-demo">
+        <div class="backdrop is-open" style="position: absolute;"></div>
+        <div class="modal is-open" style="position: absolute; transform: translate(-50%, -50%);">
+          <h3 class="card-title">Archive record?</h3>
+          <p style="font-size: var(--font-size-sm); color: var(--color-fg-muted); margin-bottom: var(--space-4);">This can be undone from the Audit Log.</p>
+          <div class="cluster">
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-danger">Archive</button>
+          </div>
+        </div>
+      </div>
+      <h3>Toast &amp; tooltip</h3>
+      <div class="overlay-demo">
+        <div class="toast is-open" style="position: absolute; bottom: var(--space-3); right: var(--space-3);">Record saved.</div>
+        <div class="tooltip is-open" style="position: absolute; top: var(--space-3); left: var(--space-3);">Tooltip text</div>
+      </div>
+    </section>
+
+    <!-- FEEDBACK -->
+    <section class="guide-section">
+      <h2>Feedback</h2>
+      <div class="stack-sm">
+        <div class="alert alert-info">3 records are awaiting your review.</div>
+        <div class="alert alert-success">Record approved.</div>
+        <div class="alert alert-warning">Due date is approaching.</div>
+        <div class="alert alert-danger">Submission failed. Try again.</div>
+      </div>
+      <div class="empty-state">
+        <strong>No records match this filter</strong>
+        <span>Try clearing filters or search terms.</span>
+      </div>
+      <div class="cluster-lg">
+        <div class="skeleton" style="width: 200px; height: 16px;"></div>
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+    <!-- LAYOUT HELPERS -->
+    <section class="guide-section">
+      <h2>Layout helpers</h2>
+      <div class="stack">
+        <div class="card">stack item one</div>
+        <div class="card">stack item two</div>
+      </div>
+      <div class="cluster" style="margin-top: var(--space-4);">
+        <span class="chip">cluster item</span>
+        <span class="chip">cluster item</span>
+        <span class="chip">cluster item</span>
+      </div>
+      <div class="grid grid-3" style="margin-top: var(--space-4);">
+        <div class="card">grid cell</div>
+        <div class="card">grid cell</div>
+        <div class="card">grid cell</div>
+      </div>
+    </section>
+
+    <!-- UI GUIDELINES -->
+    <section class="guide-section guide-prose">
+      <h2>UI Guidelines</h2>
+      <p>This product is an internal operations console for managing business records, workflows and tasks (RBAC, search/filtering, reporting, audit logging, document metadata). These rules keep every screen consistent with that job.</p>
+
+      <h3>Navigation</h3>
+      <ul>
+        <li>Persistent left sidebar (collapses behind a menu button below desktop width) because users jump between unrelated sections (Records, Tasks, Reports, Audit Log) within a single session and a top bar can't hold that many destinations legibly.</li>
+        <li>Sidebar sections, in order: Dashboard, Records, Tasks, Reports, Audit Log, Admin (RBAC/user management) — ordered by frequency of use, with Admin last since only a subset of roles reach it.</li>
+        <li>A slim top bar holds only global, cross-section controls: search, notifications, and the account menu — anything section-specific belongs in the sidebar or the page itself, not here.</li>
+      </ul>
+
+      <h3>Layout and density</h3>
+      <ul>
+        <li>This is a data-dense console, not a spacious consumer app: default to compact spacing (space-2/space-3) inside tables and forms so operators can scan many records per screen. Reserve generous spacing (space-5/space-6) for the gaps between major page sections, not within them.</li>
+        <li>Below 768px, tables degrade to stacked record cards and the sidebar hides behind the menu button — operators doing deep record/task work are expected on desktop, so mobile only needs to support a quick look-up or a single approval, not full editing workflows.</li>
+      </ul>
+
+      <h3>Component usage</h3>
+      <ul>
+        <li>Use .card to group a record's own fields or a dashboard summary — one subject per card.</li>
+        <li>Use a table (native &lt;table&gt; styled with the token-based borders/spacing) for any list the user scans, sorts or compares across rows — records, tasks, audit entries.</li>
+        <li>Use .stack/list markup only for short, unordered collections (e.g. attached documents on a record) where tabular comparison isn't the point.</li>
+        <li>.btn-primary is reserved for the one primary action per screen (save, submit, approve); every other action is .btn-secondary or .btn-ghost so the primary action stays visually unambiguous.</li>
+        <li>Use .modal for a focused action that blocks the current screen (confirm, quick-create); use .drawer for viewing or editing a record's detail without losing the list behind it — operators frequently need to keep their place in a filtered list.</li>
+        <li>Use .badge for record/task status (neutral/success/warning/danger map to draft/approved/pending/rejected) since status must be scannable at a glance down a column.</li>
+        <li>Use .toast only for confirmation of an action already completed (saved, exported); use .alert for anything the user must read before proceeding, since toasts auto-dismiss.</li>
+      </ul>
+
+      <h3>Theme</h3>
+      <ul>
+        <li>Light theme only. This is an internal, screen-sharing-heavy business tool where consistent screenshots (for audit and support) matter more than per-user theme preference.</li>
+      </ul>
+
+      <h3>Voice and tone</h3>
+      <ul>
+        <li>Direct and factual: describe what happened or what is needed ("3 records require approval"), never embellished or playful — this is a system of record, not a marketing surface.</li>
+        <li>Error and validation copy states the fix, not just the problem ("Enter a date before the due date" rather than "Invalid date"), since operators need to resolve it and move on quickly.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>

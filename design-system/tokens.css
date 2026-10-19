@@ -1,0 +1,65 @@
+/**
+ * Do not edit directly, this file was auto-generated.
+ */
+
+:root {
+  --color-bg: #ffffff; /** Default page and surface background. */
+  --color-bg-subtle: #f8fafc; /** Sidebar, table header and zebra-row background. */
+  --color-bg-inset: #f1f5f9; /** Recessed surfaces: input backgrounds, code blocks, neutral chip fill. */
+  --color-fg: #1e293b; /** Primary body text. Meets WCAG AA (4.5:1) on color-bg. */
+  --color-fg-muted: #64748b; /** Secondary text: hints, captions, table metadata. */
+  --color-fg-inverse: #ffffff; /** Text/icon color on filled, high-emphasis surfaces (primary/danger buttons). */
+  --color-primary: #2563eb; /** Primary brand/action color for the app. */
+  --color-primary-hover: #1d4ed8; /** Hover/active state for primary-colored controls. */
+  --color-primary-subtle: #dceafe; /** Low-emphasis primary fill: selected nav item, info badge/alert background. */
+  --color-border: #e2e8f0; /** Default hairline border for cards, tables, dividers. */
+  --color-border-strong: #cbd5e1; /** Emphasized border: input outlines, secondary button border. */
+  --color-success: #16a34a; /** Success state: approved records, completed tasks. */
+  --color-success-subtle: #dcfce7; /** Success badge/alert background. */
+  --color-warning: #d97706; /** Warning state: pending review, approaching deadline. */
+  --color-warning-subtle: #fef3c7; /** Warning badge/alert background. */
+  --color-danger: #dc2626; /** Destructive actions and error states. */
+  --color-danger-subtle: #fee4e4; /** Danger badge/alert background. */
+  --color-overlay: rgba(15, 23, 42, 0.5); /** Modal/drawer backdrop scrim. */
+  --space-1: 4px; /** Tightest spacing: icon-to-label gaps, chip padding. */
+  --space-2: 8px; /** Compact spacing: form control internal padding, stack gaps within a field. */
+  --space-3: 12px; /** Default spacing: table cell padding, button padding. */
+  --space-4: 16px; /** Component spacing: card padding, gap between fields. */
+  --space-5: 24px; /** Section spacing: gap between cards, page section padding. */
+  --space-6: 32px; /** Layout spacing: page gutters on desktop. */
+  --radius-sm: 4px; /** Chips, badges, small controls. */
+  --radius-md: 8px; /** Default corner radius: buttons, inputs, cards. */
+  --radius-lg: 12px; /** Overlays: modals, drawers, dropdown menus. */
+  --radius-full: 9999px; /** Fully-rounded controls: avatars, switches, pill chips. */
+  --font-size-xs: 12px; /** Captions, badge labels, table meta text. */
+  --font-size-sm: 13px; /** Dense UI text: table cells, form labels, secondary buttons. */
+  --font-size-md: 15px; /** Default body text. */
+  --font-size-lg: 20px; /** Section and card headings. */
+  --font-size-xl: 24px; /** Page titles. */
+  --font-family-sans: Inter, system-ui, -apple-system, sans-serif; /** Default UI typeface for all text. */
+  --font-family-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; /** Record IDs, codes, audit log timestamps. */
+  --font-weight-regular: 400; /** Body text. */
+  --font-weight-medium: 500; /** Labels, button text, table headers. */
+  --font-weight-semibold: 600; /** Headings, emphasized values. */
+  --shadow-sm: 0px 1px 2px 0px rgb(5.9% 9% 16.5% / 0.08); /** Resting elevation: cards, dropdown triggers. */
+  --shadow-md: 0px 8px 24px 0px rgb(5.9% 9% 16.5% / 0.16); /** Floating elevation: dropdown menus, modals, toasts. */
+  --button-primary-background: var(--color-primary); /** Primary button fill. */
+  --button-primary-background-hover: var(--color-primary-hover); /** Primary button hover/active fill. */
+  --button-primary-foreground: var(--color-fg-inverse); /** Primary button label/icon color. */
+  --button-secondary-background: var(--color-bg); /** Secondary button fill. */
+  --button-secondary-border: var(--color-border-strong); /** Secondary button outline. */
+  --button-secondary-foreground: var(--color-fg); /** Secondary button label color. */
+  --button-ghost-foreground: var(--color-fg); /** Ghost button label color. */
+  --button-danger-background: var(--color-danger); /** Destructive button fill. */
+  --button-danger-foreground: var(--color-fg-inverse); /** Destructive button label color. */
+  --card-default-background: var(--color-bg); /** Card surface fill. */
+  --card-default-border: var(--color-border); /** Card outline. */
+  --card-default-radius: var(--radius-md); /** Card corner radius. */
+  --card-default-padding: var(--space-4); /** Card internal padding. */
+  --input-default-background: var(--color-bg); /** Form control fill. */
+  --input-default-border: var(--color-border-strong); /** Form control outline. */
+  --input-default-foreground: var(--color-fg); /** Form control text color. */
+  --input-invalid-border: var(--color-danger); /** Form control outline when validation fails. */
+  --badge-neutral-background: var(--color-bg-inset); /** Neutral badge/chip fill. */
+  --badge-neutral-foreground: var(--color-fg-muted); /** Neutral badge/chip text. */
+}

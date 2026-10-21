@@ -1,0 +1,64 @@
+version: 1
+components:
+  comp_web_app:
+    name: Web App
+    kind: web_ui
+    directory: apps/web
+    stack:
+      choices:
+        styling: tailwindcss
+        language: typescript
+        framework: react+vite
+        package_manager: pnpm
+        testing_tool_e2e: playwright
+        testing_tool_unit: vitest
+      notes: SPA for role-based business dashboards, authenticates via Cognito
+  comp_api_service:
+    name: API Service
+    kind: api_service
+    directory: services/api
+    stack:
+      choices:
+        database: postgresql
+        language: typescript
+        framework: nestjs
+        package_manager: pnpm
+        testing_tool_e2e: supertest
+        testing_tool_unit: jest
+      notes: Owns the relational schema (business records, users/roles, workflow state,
+        audit logs)
+  comp_worker:
+    name: Worker
+    kind: worker
+    directory: services/worker
+    stack:
+      choices:
+        language: typescript
+        package_manager: pnpm
+        testing_tool_unit: jest
+      notes: Plain SQS-consumer process; shares language/types with API Service; no
+        owned datastore, no externally-exercised surface
+  comp_relational_database:
+    name: Relational Database
+    kind: infrastructure
+    stack:
+      choices:
+        managed_service: PostgreSQL on Amazon RDS
+  comp_object_storage:
+    name: Object Storage
+    kind: infrastructure
+    stack:
+      choices:
+        managed_service: Amazon S3
+  comp_job_queue:
+    name: Job Queue
+    kind: infrastructure
+    stack:
+      choices:
+        managed_service: Amazon SQS
+  comp_identity_provider:
+    name: Identity Provider
+    kind: managed_service
+    stack:
+      choices:
+        managed_service: AWS Cognito

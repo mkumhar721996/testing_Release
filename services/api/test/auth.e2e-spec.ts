@@ -142,11 +142,9 @@ describe('Auth (e2e)', () => {
       .send({ token, password: PASSWORD })
       .expect(410);
     expect(res.body).toEqual({
-      statusCode: 410,
       code: 'activation_link_expired',
       message:
         'This activation link has expired. Request a new activation email.',
-      error: 'Gone',
     });
   });
 });

@@ -60,25 +60,48 @@ export class FakeRepo<T extends { id?: string }> {
 }
 
 /**
- * Transactions run one at a time, which is what the pessimistic row lock the
- * real services request gives per row.
+ * Transactions run concurrently. Like Postgres, a `pessimistic_write` lookup
+ * blocks other lockers of the same row until the transaction finishes; a
+ * lookup that does not ask for the lock gets no protection.
  */
 export class FakeDataSource {
-  private queue: Promise<unknown> = Promise.resolve();
+  private locks = new Map<string, Promise<void>>();
 
   constructor(private repos: Map<unknown, FakeRepo<never>>) {}
 
-  transaction<R>(fn: (manager: unknown) => Promise<R>): Promise<R> {
+  async transaction<R>(fn: (manager: unknown) => Promise<R>): Promise<R> {
     const repo = (cls: unknown) => this.repos.get(cls)!;
+    const releases: Array<() => void> = [];
     const manager = {
-      findOne: (cls: unknown, opts: { where: never }) =>
-        repo(cls).findOneBy(opts.where),
+      findOne: async (
+        cls: unknown,
+        opts: { where: never; lock?: { mode: string } },
+      ) => {
+        if (opts.lock?.mode === 'pessimistic_write') {
+          const key = `${(cls as { name: string }).name}:${JSON.stringify(opts.where)}`;
+          while (this.locks.has(key)) await this.locks.get(key);
+          let release!: () => void;
+          this.locks.set(
+            key,
+            new Promise<void>((resolve) => {
+              release = () => {
+                this.locks.delete(key);
+                resolve();
+              };
+            }),
+          );
+          releases.push(release);
+        }
+        return repo(cls).findOneBy(opts.where);
+      },
       update: (cls: unknown, where: never, partial: never) =>
         repo(cls).update(where, partial),
     };
-    const run = this.queue.then(() => fn(manager));
-    this.queue = run.catch(() => undefined);
-    return run;
+    try {
+      return await fn(manager);
+    } finally {
+      releases.forEach((release) => release());
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   AdminEnableUserCommand,
@@ -8,11 +8,12 @@ import {
   InitiateAuthCommand,
   RevokeTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { InvalidCredentialsError } from './auth.errors';
+import { InvalidCredentialsError, PasswordPolicyError } from './auth.errors';
 import { CognitoAuthPort } from './cognito-auth.port';
 
 @Injectable()
 export class AwsCognitoAuth implements CognitoAuthPort {
+  private readonly logger = new Logger(AwsCognitoAuth.name);
   private readonly client: CognitoIdentityProviderClient;
   private readonly poolId: string;
   private readonly clientId: string;
@@ -35,8 +36,17 @@ export class AwsCognitoAuth implements CognitoAuthPort {
           AuthParameters: { USERNAME: email, PASSWORD: password },
         }),
       );
-    } catch {
-      throw new InvalidCredentialsError();
+    } catch (err) {
+      const name = (err as Error).name;
+      if (
+        name === 'NotAuthorizedException' ||
+        name === 'UserNotFoundException'
+      ) {
+        throw new InvalidCredentialsError();
+      }
+      // Outages, throttling and misconfiguration are not failed passwords.
+      this.logger.error(`Cognito InitiateAuth failed: ${name}`);
+      throw err;
     }
     // Any challenge (MFA or otherwise) is a failure: no second factor is ever requested.
     const refreshToken = res.AuthenticationResult?.RefreshToken;
@@ -64,14 +74,21 @@ export class AwsCognitoAuth implements CognitoAuthPort {
   }
 
   async setPermanentPassword(email: string, password: string): Promise<void> {
-    await this.client.send(
-      new AdminSetUserPasswordCommand({
-        UserPoolId: this.poolId,
-        Username: email,
-        Password: password,
-        Permanent: true,
-      }),
-    );
+    try {
+      await this.client.send(
+        new AdminSetUserPasswordCommand({
+          UserPoolId: this.poolId,
+          Username: email,
+          Password: password,
+          Permanent: true,
+        }),
+      );
+    } catch (err) {
+      if ((err as Error).name === 'InvalidPasswordException') {
+        throw new PasswordPolicyError();
+      }
+      throw err;
+    }
   }
 
   async enableUser(email: string): Promise<void> {

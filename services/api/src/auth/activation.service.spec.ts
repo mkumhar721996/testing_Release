@@ -3,6 +3,7 @@ import { ActivationService } from './activation.service';
 import {
   ActivationLinkExpiredError,
   ActivationLinkInvalidError,
+  PasswordPolicyError,
 } from './auth.errors';
 import { ActivationToken } from './entities/activation-token.entity';
 import { User } from './entities/user.entity';
@@ -59,7 +60,9 @@ describe('ActivationService', () => {
       const user = await pendingUser(email);
       const { token } = await activation.issue(user.id);
       await activation.redeem(token, PASSWORD);
-      expect(user.status).toBe('active');
+      expect((await users.findOneByOrFail({ id: user.id })).status).toBe(
+        'active',
+      );
       expect(cognito.setPermanentPassword).toHaveBeenCalledWith(
         email,
         PASSWORD,
@@ -99,7 +102,33 @@ describe('ActivationService', () => {
     await expect(activation.redeem(token, PASSWORD)).rejects.toBeInstanceOf(
       ActivationLinkExpiredError,
     );
-    expect(user.status).toBe('pending');
+    expect((await users.findOneByOrFail({ id: user.id })).status).toBe(
+      'pending',
+    );
     expect(cognito.enableUser).not.toHaveBeenCalled();
+  });
+
+  it('lets only one of two concurrent redemptions through', async () => {
+    const user = await pendingUser('a@example.com');
+    const { token } = await activation.issue(user.id);
+    const results = await Promise.allSettled([
+      activation.redeem(token, PASSWORD),
+      activation.redeem(token, PASSWORD),
+    ]);
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(cognito.setPermanentPassword).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a password Cognito refuses without consuming the link', async () => {
+    const user = await pendingUser('a@example.com');
+    const { token } = await activation.issue(user.id);
+    cognito.setPermanentPassword.mockRejectedValueOnce(
+      new PasswordPolicyError(),
+    );
+    await expect(activation.redeem(token, 'weak')).rejects.toBeInstanceOf(
+      PasswordPolicyError,
+    );
+    expect(tokens.rows[0].usedAt).toBeNull();
+    await expect(activation.redeem(token, PASSWORD)).resolves.toBeUndefined();
   });
 });

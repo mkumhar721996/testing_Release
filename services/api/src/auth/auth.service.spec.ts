@@ -1,10 +1,15 @@
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { InvalidCredentialsError, SignInRefusedError } from './auth.errors';
 import { Session } from './entities/session.entity';
 import { User } from './entities/user.entity';
 import { SessionService } from './session.service';
-import { FakeClock, FakeRepo, fakeCognito } from './testing/fakes';
+import {
+  FakeClock,
+  FakeDataSource,
+  FakeRepo,
+  fakeCognito,
+} from './testing/fakes';
 
 const t0 = new Date('2026-01-01T00:00:00Z');
 const MIN = 60_000;
@@ -16,6 +21,7 @@ describe('AuthService', () => {
   let sessions: SessionService;
   let auth: AuthService;
   let user: User;
+  const stored = () => users.findOneByOrFail({ id: user.id });
 
   const fail = async (n: number) => {
     cognito.signIn.mockRejectedValue(new InvalidCredentialsError());
@@ -32,6 +38,7 @@ describe('AuthService', () => {
     });
 
   beforeEach(async () => {
+    process.env.SESSION_ENCRYPTION_KEY = 'test-encryption-key';
     clock = new FakeClock(t0);
     cognito = fakeCognito();
     users = new FakeRepo<User>();
@@ -40,7 +47,9 @@ describe('AuthService', () => {
       clock,
     );
     auth = new AuthService(
-      users as unknown as Repository<User>,
+      new FakeDataSource(
+        new Map([[User, users as never]]),
+      ) as unknown as DataSource,
       sessions,
       cognito,
       clock,
@@ -72,26 +81,26 @@ describe('AuthService', () => {
 
   it('refuses a wrong password and counts it (AC6)', async () => {
     await fail(1);
-    expect(user.failedSignInCount).toBe(1);
+    expect((await stored()).failedSignInCount).toBe(1);
   });
 
   it('refuses unknown and pending accounts without calling Cognito', async () => {
     await expect(auth.signIn('nobody@example.com', 'x')).rejects.toBeInstanceOf(
       SignInRefusedError,
     );
-    user.status = 'pending';
+    await users.update({ id: user.id }, { status: 'pending' });
     await expect(auth.signIn(user.email, 'x')).rejects.toBeInstanceOf(
       SignInRefusedError,
     );
     expect(cognito.signIn).not.toHaveBeenCalled();
-    expect(user.failedSignInCount).toBe(0);
+    expect((await stored()).failedSignInCount).toBe(0);
   });
 
   it('succeeds after 4 consecutive failures and resets the count (AC11)', async () => {
     await fail(4);
     succeed();
     await expect(auth.signIn(user.email, 'right')).resolves.toBeDefined();
-    expect(user.failedSignInCount).toBe(0);
+    expect((await stored()).failedSignInCount).toBe(0);
   });
 
   it('refuses the correct password after 5 failures (AC12)', async () => {
@@ -118,8 +127,8 @@ describe('AuthService', () => {
     succeed();
     clock.set(t0.getTime() + 15 * MIN);
     await expect(auth.signIn(user.email, 'right')).resolves.toBeDefined();
-    expect(user.lockStartedAt).toBeNull();
-    expect(user.failedSignInCount).toBe(0);
+    expect((await stored()).lockStartedAt).toBeNull();
+    expect((await stored()).failedSignInCount).toBe(0);
   });
 
   it('does not extend the lock with attempts made while locked', async () => {
@@ -129,5 +138,23 @@ describe('AuthService', () => {
     succeed();
     clock.set(t0.getTime() + 15 * MIN);
     await expect(auth.signIn(user.email, 'right')).resolves.toBeDefined();
+  });
+
+  it('cannot be brute-forced with parallel guesses', async () => {
+    cognito.signIn.mockRejectedValue(new InvalidCredentialsError());
+    const results = await Promise.allSettled(
+      Array.from({ length: 10 }, () => auth.signIn(user.email, 'bad')),
+    );
+    expect(results.every((r) => r.status === 'rejected')).toBe(true);
+    expect(cognito.signIn).toHaveBeenCalledTimes(5);
+    expect((await stored()).lockStartedAt).toEqual(t0);
+  });
+
+  it('does not count Cognito outages as failed passwords', async () => {
+    cognito.signIn.mockRejectedValue(new Error('network down'));
+    await expect(auth.signIn(user.email, 'right')).rejects.toThrow(
+      'network down',
+    );
+    expect((await stored()).failedSignInCount).toBe(0);
   });
 });

@@ -18,6 +18,7 @@ describe("SignInPage", () => {
     await user.click(screen.getByRole("button", { name: /sign in/i }));
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toBe(GENERIC);
+    expect(screen.queryByText("ada@example.com")).toBeNull();
     expect(signIn).toHaveBeenCalledWith("ada@example.com", "test-password");
   });
 });

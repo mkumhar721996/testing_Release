@@ -17,16 +17,22 @@ export class FakeClock extends Clock {
   }
 }
 
-/** In-memory stand-in for the slice of a TypeORM repository the services use. */
+/**
+ * In-memory stand-in for the slice of a TypeORM repository the services use.
+ * Like a real database it hands out copies, so only saved state is observable.
+ */
 export class FakeRepo<T extends { id?: string }> {
-  rows: T[] = [];
+  private stored: T[] = [];
+
+  get rows(): T[] {
+    return this.stored.map((r) => structuredClone(r));
+  }
 
   async findOneBy(where: Partial<T>): Promise<T | null> {
-    return (
-      this.rows.find((r) =>
-        Object.entries(where).every(([k, v]) => (r as never)[k] === v),
-      ) ?? null
+    const row = this.stored.find((r) =>
+      Object.entries(where).every(([k, v]) => (r as never)[k] === v),
     );
+    return row ? structuredClone(row) : null;
   }
 
   async findOneByOrFail(where: Partial<T>): Promise<T> {
@@ -36,24 +42,43 @@ export class FakeRepo<T extends { id?: string }> {
   }
 
   async save(entity: T): Promise<T> {
-    if (!this.rows.includes(entity)) {
-      entity.id ??= randomUUID();
-      this.rows.push(entity);
-    }
+    entity.id ??= randomUUID();
+    const copy = structuredClone(entity);
+    const i = this.stored.findIndex((r) => r.id === entity.id);
+    if (i >= 0) this.stored[i] = copy;
+    else this.stored.push(copy);
     return entity;
+  }
+
+  async update(where: Partial<T>, partial: Partial<T>): Promise<void> {
+    this.stored
+      .filter((r) =>
+        Object.entries(where).every(([k, v]) => (r as never)[k] === v),
+      )
+      .forEach((r) => Object.assign(r, structuredClone(partial)));
   }
 }
 
-/** Runs the transaction callback directly against the in-memory repos. */
+/**
+ * Transactions run one at a time, which is what the pessimistic row lock the
+ * real services request gives per row.
+ */
 export class FakeDataSource {
+  private queue: Promise<unknown> = Promise.resolve();
+
   constructor(private repos: Map<unknown, FakeRepo<never>>) {}
 
-  async transaction<R>(fn: (manager: unknown) => Promise<R>): Promise<R> {
+  transaction<R>(fn: (manager: unknown) => Promise<R>): Promise<R> {
     const repo = (cls: unknown) => this.repos.get(cls)!;
-    return fn({
-      findOneBy: (cls: unknown, where: never) => repo(cls).findOneBy(where),
-      save: (cls: unknown, entity: never) => repo(cls).save(entity),
-    });
+    const manager = {
+      findOne: (cls: unknown, opts: { where: never }) =>
+        repo(cls).findOneBy(opts.where),
+      update: (cls: unknown, where: never, partial: never) =>
+        repo(cls).update(where, partial),
+    };
+    const run = this.queue.then(() => fn(manager));
+    this.queue = run.catch(() => undefined);
+    return run;
   }
 }
 

@@ -17,11 +17,13 @@ import {
   ACTIVATION_EXPIRED_MESSAGE,
   ACTIVATION_INVALID_MESSAGE,
   GENERIC_REFUSAL_MESSAGE,
+  PASSWORD_POLICY_MESSAGE,
   SESSION_COOKIE,
 } from './auth.constants';
 import {
   ActivationLinkExpiredError,
   ActivationLinkInvalidError,
+  PasswordPolicyError,
   SignInRefusedError,
 } from './auth.errors';
 import { AuthService } from './auth.service';
@@ -103,6 +105,12 @@ export class AuthController {
         throw new GoneException({
           code: 'activation_link_expired',
           message: ACTIVATION_EXPIRED_MESSAGE,
+        });
+      }
+      if (err instanceof PasswordPolicyError) {
+        throw new BadRequestException({
+          code: 'password_policy',
+          message: PASSWORD_POLICY_MESSAGE,
         });
       }
       if (err instanceof ActivationLinkInvalidError) {

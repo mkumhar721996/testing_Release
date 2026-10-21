@@ -16,6 +16,12 @@ export class ActivationLinkExpiredError extends Error {
   }
 }
 
+export class PasswordPolicyError extends Error {
+  constructor() {
+    super('Password does not meet the password policy');
+  }
+}
+
 export class ActivationLinkInvalidError extends Error {
   constructor() {
     super('Activation link invalid');

@@ -15,6 +15,8 @@ const GENERIC = { message: 'Incorrect email or password.' };
 const t0 = new Date('2026-01-01T00:00:00Z');
 const PASSWORD = 'test-password';
 
+process.env.SESSION_ENCRYPTION_KEY ??= 'test-encryption-key';
+
 describe('Auth (e2e)', () => {
   let app: INestApplication;
   let clock: FakeClock;
@@ -86,7 +88,9 @@ describe('Auth (e2e)', () => {
     const agent = request.agent(app.getHttpServer());
     await agent
       .post('/auth/sign-in')
-      .send({ email: user.email, password: PASSWORD });
+      .send({ email: user.email, password: PASSWORD })
+      .expect(200);
+    await agent.get('/auth/session').expect(200);
     clock.advance(30 * 60_000);
     const res = await agent.get('/auth/session').expect(401);
     expect(res.body.code).toBe('session_expired');
@@ -109,7 +113,10 @@ describe('Auth (e2e)', () => {
     bodies.push((await signIn('nobody@example.com')).body);
     bodies.push((await signIn(pending.email)).body);
     for (let i = 0; i < 5; i++) await signIn(locked.email, 'wrong');
-    bodies.push((await signIn(locked.email)).body);
+    // Cognito would accept the password now, so only the lock can refuse it.
+    cognito.signIn.mockResolvedValue({ refreshToken: 'r', sub: 'sub' });
+    const lockedRes = await signIn(locked.email).expect(401);
+    bodies.push(lockedRes.body);
     for (const b of bodies) expect(b).toEqual(GENERIC);
   });
 

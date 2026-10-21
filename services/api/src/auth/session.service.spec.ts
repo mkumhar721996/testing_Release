@@ -8,12 +8,25 @@ const t0 = new Date('2026-01-01T00:00:00Z');
 describe('SessionService', () => {
   let clock: FakeClock;
   let sessions: SessionService;
+  let repo: FakeRepo<Session>;
 
   beforeEach(() => {
+    process.env.SESSION_ENCRYPTION_KEY = 'test-encryption-key';
     clock = new FakeClock(t0);
+    repo = new FakeRepo<Session>();
     sessions = new SessionService(
-      new FakeRepo<Session>() as unknown as Repository<Session>,
+      repo as unknown as Repository<Session>,
       clock,
+    );
+  });
+
+  it('stores neither the session id nor the refresh token in plaintext', async () => {
+    const s = await sessions.create('user-1', 'refresh-token-value');
+    const [row] = repo.rows;
+    expect(row.id).not.toBe(s.id);
+    expect(row.cognitoRefreshToken).not.toContain('refresh-token-value');
+    expect((await sessions.end(s.id))?.cognitoRefreshToken).toBe(
+      'refresh-token-value',
     );
   });
 

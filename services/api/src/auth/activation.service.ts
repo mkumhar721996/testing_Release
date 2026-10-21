@@ -41,23 +41,26 @@ export class ActivationService {
 
   async redeem(token: string, password: string): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
-      const row = await manager.findOneBy(ActivationToken, {
-        tokenHash: hash(String(token)),
+      // The row lock makes redemption single-use under concurrency.
+      const row = await manager.findOne(ActivationToken, {
+        where: { tokenHash: hash(String(token)) },
+        lock: { mode: 'pessimistic_write' },
       });
       if (!row || row.usedAt) throw new ActivationLinkInvalidError();
       const now = this.clock.now();
       if (now.getTime() >= row.expiresAt.getTime()) {
         throw new ActivationLinkExpiredError();
       }
-      const user = await manager.findOneBy(User, { id: row.userId });
+      const user = await manager.findOne(User, { where: { id: row.userId } });
       if (!user) throw new ActivationLinkInvalidError();
 
+      // A policy rejection throws here, rolling back with the link unused. If
+      // the commit below fails after Cognito changed, the link is still unused
+      // and both Cognito calls are idempotent, so retrying the link is safe.
       await this.cognito.setPermanentPassword(user.email, password);
       await this.cognito.enableUser(user.email);
-      user.status = 'active';
-      row.usedAt = now;
-      await manager.save(User, user);
-      await manager.save(ActivationToken, row);
+      await manager.update(User, { id: user.id }, { status: 'active' });
+      await manager.update(ActivationToken, { id: row.id }, { usedAt: now });
     });
   }
 }

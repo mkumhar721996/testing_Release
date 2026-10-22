@@ -27,6 +27,7 @@ import {
   SignInRefusedError,
 } from './auth.errors';
 import { AuthService } from './auth.service';
+import type { UserRole } from './entities/user.entity';
 import { SessionGuard } from './session.guard';
 
 const cookieOptions = () => ({
@@ -83,7 +84,7 @@ export class AuthController {
 
   @Get('session')
   @UseGuards(SessionGuard)
-  session(@Req() req: Request & { user?: { id: string; email: string } }) {
+  session(@Req() req: Request & { user?: { id: string; email: string; role: UserRole } }) {
     return { user: req.user };
   }
 

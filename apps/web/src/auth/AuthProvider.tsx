@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import * as client from "./authClient";
 
 type AuthContextValue = {
-  user: { email: string } | null;
+  user: client.SessionUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<client.SignInResult>;
   signOut: () => Promise<void>;
@@ -11,7 +11,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [user, setUser] = useState<client.SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

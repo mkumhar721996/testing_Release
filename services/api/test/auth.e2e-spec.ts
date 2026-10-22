@@ -75,7 +75,7 @@ describe('Auth (e2e)', () => {
     expect(res.headers['set-cookie'][0]).toMatch(/^sid=.*HttpOnly/);
     expect(res.body).toEqual({
       status: 'signed_in',
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, role: 'manager' },
     });
     await agent.get('/auth/session').expect(200);
     await agent.post('/auth/sign-out').expect(204);

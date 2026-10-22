@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  server: { fs: { allow: [".", "../../design-system"] } },
   test: {
     environment: "jsdom",
     globals: true,

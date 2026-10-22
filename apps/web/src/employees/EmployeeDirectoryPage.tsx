@@ -66,7 +66,7 @@ export function EmployeeDirectoryPage({ role, onAddEmployee }: Props) {
             {isHr && (
               <button type="button" className="btn btn-primary btn-tall" onClick={onAddEmployee}>
                 <Icon name="plus" />
-                Add employee
+                Add first employee
               </button>
             )}
           </div>

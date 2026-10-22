@@ -119,7 +119,7 @@ describe("no employees (AC9-AC11)", () => {
     vi.mocked(listEmployees).mockResolvedValue(empty);
     render(<EmployeeDirectoryPage role="hr_admin" />);
     expect(await screen.findByText("No employees yet")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add employee" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add first employee" })).toBeInTheDocument();
     expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
   });
 

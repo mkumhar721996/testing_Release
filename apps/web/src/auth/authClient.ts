@@ -33,9 +33,12 @@ export async function activate(token: string, password: string): Promise<Activat
   };
 }
 
-export async function getSession(): Promise<{ email: string } | null> {
+export type Role = "hr_admin" | "manager";
+export type SessionUser = { email: string; role: Role };
+
+export async function getSession(): Promise<SessionUser | null> {
   const res = await fetch(`${base()}/auth/session`, { credentials: "include" });
   if (!res.ok) return null;
   const data = await res.json();
-  return { email: data.user.email };
+  return { email: data.user.email, role: data.user.role };
 }

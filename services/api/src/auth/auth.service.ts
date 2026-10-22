@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import { InvalidCredentialsError, SignInRefusedError } from './auth.errors';
 import { Clock } from './clock';
 import { COGNITO_AUTH, CognitoAuthPort } from './cognito-auth.port';
-import { User } from './entities/user.entity';
+import { User, type UserRole } from './entities/user.entity';
 import { afterFailure, afterSuccess, isLocked } from './lockout.policy';
 import { SessionService } from './session.service';
 
@@ -22,7 +22,7 @@ export class AuthService {
   async signIn(
     email: string,
     password: string,
-  ): Promise<{ sessionId: string; user: { id: string; email: string } }> {
+  ): Promise<{ sessionId: string; user: { id: string; email: string; role: UserRole } }> {
     // The row lock serialises attempts per account, so the lock check, the
     // Cognito call and the counter update cannot interleave across requests.
     // Refusals are returned, not thrown, so the failure count is committed.
@@ -58,7 +58,11 @@ export class AuthService {
     );
     return {
       sessionId: session.id,
-      user: { id: outcome.user.id, email: outcome.user.email },
+      user: {
+        id: outcome.user.id,
+        email: outcome.user.email,
+        role: outcome.user.role,
+      },
     };
   }
 

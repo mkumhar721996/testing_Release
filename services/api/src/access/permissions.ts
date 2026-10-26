@@ -37,9 +37,8 @@ export function can(
     case 'record:read':
       return canAccessRecord(actor, target);
     case 'record:write':
-      return (
-        actor.role !== 'read_only_executive' && canAccessRecord(actor, target)
-      );
+      // Until Employee Records defines who may edit, only HR admins can.
+      return actor.role === 'hr_admin' && target !== undefined;
     case 'leave:read':
       return true;
     case 'dashboards:read':

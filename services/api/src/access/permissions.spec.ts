@@ -49,10 +49,15 @@ describe('can', () => {
     expect(can(exec, 'record:read', target('e2'))).toBe(false);
   });
 
-  it('limits manager writes to direct reports', () => {
-    const manager = actor('manager', 'm1');
-    expect(can(manager, 'record:write', target('e1', 'm1'))).toBe(true);
-    expect(can(manager, 'record:write', target('e1', 'x'))).toBe(false);
+  it('limits record writes to HR admins', () => {
+    expect(can(actor('hr_admin'), 'record:write', target('e2'))).toBe(true);
+    expect(can(actor('employee'), 'record:write', target('e1'))).toBe(false);
+    expect(
+      can(actor('manager', 'm1'), 'record:write', target('e1', 'm1')),
+    ).toBe(false);
+    expect(can(actor('manager', 'm1'), 'record:write', target('m1'))).toBe(
+      false,
+    );
   });
 
   it('refuses a user with no employee row any record', () => {

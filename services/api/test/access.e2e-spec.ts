@@ -143,6 +143,21 @@ describe('Role-based access (e2e)', () => {
     expect(stored.displayName).toBe('Before');
   });
 
+  it('refuses an employee and a manager any record change', async () => {
+    const manager = await makePerson('manager');
+    const report = await makePerson('employee', manager.employee.id);
+    const asEmployee = await signedIn(report.user.email);
+    await asEmployee
+      .patch(`/employees/${report.employee.id}`)
+      .send({ displayName: 'x' })
+      .expect(403);
+    const asManager = await signedIn(manager.user.email);
+    await asManager
+      .patch(`/employees/${report.employee.id}`)
+      .send({ displayName: 'x' })
+      .expect(403);
+  });
+
   it('lets an HR admin change a record', async () => {
     const admin = await makePerson('hr_admin');
     const other = await makePerson('employee');

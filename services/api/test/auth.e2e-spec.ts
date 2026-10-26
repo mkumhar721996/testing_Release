@@ -103,6 +103,20 @@ describe('Auth (e2e)', () => {
     expect(res.headers['set-cookie']).toBeUndefined();
   });
 
+  it('refuses an unregistered username without a cookie', async () => {
+    const res = await signIn('nobody@example.com', 'anything').expect(401);
+    expect(res.headers['set-cookie']).toBeUndefined();
+    expect(res.body).toEqual(GENERIC);
+  });
+
+  it('refuses an empty password without a cookie or a Cognito call', async () => {
+    const user = await makeUser();
+    const res = await signIn(user.email, '').expect(401);
+    expect(res.headers['set-cookie']).toBeUndefined();
+    expect(res.body).toEqual(GENERIC);
+    expect(cognito.signIn).not.toHaveBeenCalled();
+  });
+
   it('gives an identical refusal for every failure reason (AC7)', async () => {
     const wrongUser = await makeUser();
     const pending = await makeUser('pending');

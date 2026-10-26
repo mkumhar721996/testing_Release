@@ -52,7 +52,8 @@ export class AuthController {
     try {
       if (
         typeof body?.email !== 'string' ||
-        typeof body?.password !== 'string'
+        typeof body?.password !== 'string' ||
+        body.password === ''
       ) {
         throw new SignInRefusedError();
       }

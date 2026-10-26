@@ -14,6 +14,12 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
   });
 
+  it("shows who is signed in", async () => {
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
+    render(<App />);
+    expect(await screen.findByText("Signed in as ada@example.com")).toBeInTheDocument();
+  });
+
   it("shows the signed-in shell with a sign-out control", async () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
     render(<App />);

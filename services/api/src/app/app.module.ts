@@ -3,7 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AccessModule } from '../access/access.module';
 import { AuthModule } from '../auth/auth.module';
+import { DashboardsModule } from '../dashboards/dashboards.module';
+import { EmployeesModule } from '../employees/employees.module';
+import { LeaveModule } from '../leave/leave.module';
 
 @Module({
   imports: [
@@ -23,6 +27,10 @@ import { AuthModule } from '../auth/auth.module';
       }),
     }),
     AuthModule,
+    AccessModule,
+    EmployeesModule,
+    LeaveModule,
+    DashboardsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

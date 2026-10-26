@@ -15,9 +15,15 @@ describe("App", () => {
   });
 
   it("shows the signed-in shell with a sign-out control", async () => {
-    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Web App" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+  });
+
+  it("lists Admin in the navigation only for an HR admin (AC10, AC11)", async () => {
+    vi.mocked(client.getSession).mockResolvedValue({ email: "hr@example.com", role: "hr_admin" });
+    render(<App />);
+    expect(await screen.findByText("Admin")).toBeInTheDocument();
   });
 });

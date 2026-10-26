@@ -1,5 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Role } from '../role';
+
 export type UserStatus = 'pending' | 'active';
 
 @Entity('users')
@@ -15,6 +17,9 @@ export class User {
 
   @Column({ type: 'varchar', default: 'pending' })
   status!: UserStatus;
+
+  @Column({ type: 'varchar', default: 'employee' })
+  role!: Role;
 
   @Column({ type: 'int', default: 0 })
   failedSignInCount!: number;

@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { FindOperator } from 'typeorm';
 import { InvalidCredentialsError } from '../auth.errors';
 import { Clock } from '../clock';
 import { CognitoAuthPort } from '../cognito-auth.port';
@@ -29,10 +30,20 @@ export class FakeRepo<T extends { id?: string }> {
     return this.stored.map((r) => structuredClone(r));
   }
 
-  async findOneBy(where: Partial<T>): Promise<T | null> {
-    const row = this.stored.find((r) =>
-      Object.entries(where).every(([k, v]) => (r as never)[k] === v),
+  private matches(r: T, where: Partial<T>): boolean {
+    return Object.entries(where).every(([k, v]) =>
+      v instanceof FindOperator && v.type === 'isNull'
+        ? (r as never)[k] === null
+        : (r as never)[k] === v,
     );
+  }
+
+  async delete(where: Partial<T>): Promise<void> {
+    this.stored = this.stored.filter((r) => !this.matches(r, where));
+  }
+
+  async findOneBy(where: Partial<T>): Promise<T | null> {
+    const row = this.stored.find((r) => this.matches(r, where));
     return row ? structuredClone(row) : null;
   }
 
@@ -53,9 +64,7 @@ export class FakeRepo<T extends { id?: string }> {
 
   async update(where: Partial<T>, partial: Partial<T>): Promise<void> {
     this.stored
-      .filter((r) =>
-        Object.entries(where).every(([k, v]) => (r as never)[k] === v),
-      )
+      .filter((r) => this.matches(r, where))
       .forEach((r) => Object.assign(r, structuredClone(partial)));
   }
 }

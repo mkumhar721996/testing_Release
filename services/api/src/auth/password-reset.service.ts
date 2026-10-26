@@ -1,8 +1,11 @@
 import { createHash, randomBytes } from 'crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { PASSWORD_RESET_TOKEN_TTL_MS } from './auth.constants';
+import { DataSource, IsNull, Repository } from 'typeorm';
+import {
+  PASSWORD_RESET_REQUEST_COOLDOWN_MS,
+  PASSWORD_RESET_TOKEN_TTL_MS,
+} from './auth.constants';
 import {
   PasswordResetLinkExpiredError,
   PasswordResetLinkInvalidError,
@@ -10,6 +13,7 @@ import {
 import { Clock } from './clock';
 import { COGNITO_AUTH, CognitoAuthPort } from './cognito-auth.port';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { Session } from './entities/session.entity';
 import { User } from './entities/user.entity';
 import { afterSuccess } from './lockout.policy';
 import { PasswordResetNotifier } from './password-reset.notifier';
@@ -36,13 +40,29 @@ export class PasswordResetService {
       status: 'active',
     });
     if (!user) return;
+    const now = this.clock.now();
+
+    // Per-email throttle: a link issued within the cooldown is still fresh, so
+    // repeated requests cannot flood the inbox or the table.
+    const pending = await this.tokens.findOneBy({
+      userId: user.id,
+      usedAt: IsNull(),
+    });
+    if (
+      pending &&
+      pending.expiresAt.getTime() - PASSWORD_RESET_TOKEN_TTL_MS >
+        now.getTime() - PASSWORD_RESET_REQUEST_COOLDOWN_MS
+    ) {
+      return;
+    }
+    // Only the newest link works, and unused rows never accumulate per user.
+    await this.tokens.delete({ userId: user.id, usedAt: IsNull() });
+
     const token = randomBytes(32).toString('hex');
     await this.tokens.save({
       userId: user.id,
       tokenHash: hash(token),
-      expiresAt: new Date(
-        this.clock.now().getTime() + PASSWORD_RESET_TOKEN_TTL_MS,
-      ),
+      expiresAt: new Date(now.getTime() + PASSWORD_RESET_TOKEN_TTL_MS),
       usedAt: null,
     } as PasswordResetToken);
     await this.notifier.send(user.email, token);
@@ -61,7 +81,10 @@ export class PasswordResetService {
         throw new PasswordResetLinkExpiredError();
       }
       const user = await manager.findOne(User, { where: { id: row.userId } });
-      if (!user) throw new PasswordResetLinkInvalidError();
+      // The link may predate a change of the account's state.
+      if (!user || user.status !== 'active') {
+        throw new PasswordResetLinkInvalidError();
+      }
 
       // A policy rejection throws here, rolling back with the link unused. If
       // the commit below fails after Cognito changed, the link is still unused
@@ -69,6 +92,12 @@ export class PasswordResetService {
       await this.cognito.setPermanentPassword(user.email, password);
       await manager.update(User, { id: user.id }, afterSuccess());
       await manager.update(PasswordResetToken, { id: row.id }, { usedAt: now });
+      // A session held under the old password must not outlive the reset.
+      await manager.update(
+        Session,
+        { userId: user.id, endedAt: IsNull() },
+        { endedAt: now },
+      );
     });
   }
 }

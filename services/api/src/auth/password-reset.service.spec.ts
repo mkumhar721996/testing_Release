@@ -6,7 +6,10 @@ import {
   PasswordResetLinkInvalidError,
   SignInRefusedError,
 } from './auth.errors';
-import { PASSWORD_RESET_TOKEN_TTL_MS } from './auth.constants';
+import {
+  PASSWORD_RESET_REQUEST_COOLDOWN_MS,
+  PASSWORD_RESET_TOKEN_TTL_MS,
+} from './auth.constants';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { Session } from './entities/session.entity';
 import { User } from './entities/user.entity';
@@ -30,6 +33,7 @@ describe('PasswordResetService', () => {
   let cognito: ReturnType<typeof statefulCognito>;
   let users: FakeRepo<User>;
   let tokens: FakeRepo<PasswordResetToken>;
+  let sessions: FakeRepo<Session>;
   let notifier: { send: jest.Mock };
   let resets: PasswordResetService;
   let auth: AuthService;
@@ -54,10 +58,12 @@ describe('PasswordResetService', () => {
     cognito = statefulCognito({ [EMAIL]: OLD });
     users = new FakeRepo<User>();
     tokens = new FakeRepo<PasswordResetToken>();
+    sessions = new FakeRepo<Session>();
     notifier = { send: jest.fn().mockResolvedValue(undefined) };
     const repos = new Map<unknown, FakeRepo<never>>([
       [User, users as never],
       [PasswordResetToken, tokens as never],
+      [Session, sessions as never],
     ]);
     const dataSource = new FakeDataSource(repos) as unknown as DataSource;
     resets = new PasswordResetService(
@@ -71,7 +77,7 @@ describe('PasswordResetService', () => {
     auth = new AuthService(
       dataSource,
       new SessionService(
-        new FakeRepo<Session>() as unknown as Repository<Session>,
+        sessions as unknown as Repository<Session>,
         clock,
       ),
       cognito,
@@ -160,6 +166,41 @@ describe('PasswordResetService', () => {
     await resets.request('pending@example.com');
     expect(notifier.send).not.toHaveBeenCalled();
     expect(tokens.rows).toHaveLength(0);
+  });
+
+  it('ends the user\'s existing sessions on reset', async () => {
+    const { sessionId } = await auth.signIn(EMAIL, OLD);
+    const token = await requestToken();
+    await resets.redeem(token, NEW);
+    expect(sessions.rows).toHaveLength(1);
+    expect(sessions.rows[0].endedAt).not.toBeNull();
+    expect(sessionId).toBeDefined();
+  });
+
+  it('rejects a link whose user is no longer active', async () => {
+    const token = await requestToken();
+    await users.update({ email: EMAIL }, { status: 'pending' });
+    await expect(resets.redeem(token, NEW)).rejects.toBeInstanceOf(
+      PasswordResetLinkInvalidError,
+    );
+    expect(cognito.setPermanentPassword).not.toHaveBeenCalled();
+  });
+
+  it('sends no second link inside the cooldown', async () => {
+    await resets.request(EMAIL);
+    await resets.request(EMAIL);
+    expect(notifier.send).toHaveBeenCalledTimes(1);
+    expect(tokens.rows).toHaveLength(1);
+  });
+
+  it('replaces the earlier unused link when issuing a new one', async () => {
+    const first = await requestToken();
+    clock.advance(PASSWORD_RESET_REQUEST_COOLDOWN_MS);
+    await resets.request(EMAIL);
+    expect(tokens.rows).toHaveLength(1);
+    await expect(resets.redeem(first, NEW)).rejects.toBeInstanceOf(
+      PasswordResetLinkInvalidError,
+    );
   });
 
   it('lets a locked-out user sign in with the new password after a reset', async () => {

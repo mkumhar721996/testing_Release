@@ -16,6 +16,25 @@ test("a refused sign-in shows only the generic message", async ({ page }) => {
   await expect(page.getByRole("alert")).toHaveText(GENERIC);
 });
 
+test("valid credentials sign the user in", async ({ page }) => {
+  let signedIn = false;
+  await page.route("**/auth/session", (r) =>
+    signedIn
+      ? r.fulfill({ status: 200, json: { user: { email: "ada@example.com" } } })
+      : r.fulfill({ status: 401, json: { code: "session_expired" } }),
+  );
+  await page.route("**/auth/sign-in", (r) => {
+    signedIn = true;
+    return r.fulfill({ status: 200, json: { status: "signed_in" } });
+  });
+  await page.goto("/");
+  await page.getByLabel("Email").fill("ada@example.com");
+  await page.getByLabel("Password").fill("test-password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByText("Signed in as ada@example.com")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+});
+
 test("an expired activation link asks for a new email", async ({ page }) => {
   await page.route("**/auth/activate", (r) =>
     r.fulfill({

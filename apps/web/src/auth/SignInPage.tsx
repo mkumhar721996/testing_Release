@@ -51,6 +51,9 @@ export function SignInPage() {
         <button type="submit" className="w-full rounded bg-slate-900 p-2 text-white">
           Sign in
         </button>
+        <a href="/forgot-password" className="block text-sm text-slate-900 underline">
+          Forgot password?
+        </a>
       </form>
     </main>
   );

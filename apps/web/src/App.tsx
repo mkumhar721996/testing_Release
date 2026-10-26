@@ -1,5 +1,7 @@
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import { ActivatePage } from "./auth/ActivatePage";
+import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "./auth/ResetPasswordPage";
 import { SignInPage } from "./auth/SignInPage";
 
 function Shell() {
@@ -21,6 +23,11 @@ function App() {
   if (window.location.pathname === "/activate") {
     const token = new URLSearchParams(window.location.search).get("token") ?? "";
     return <ActivatePage token={token} />;
+  }
+  if (window.location.pathname === "/forgot-password") return <ForgotPasswordPage />;
+  if (window.location.pathname === "/reset-password") {
+    const token = new URLSearchParams(window.location.search).get("token") ?? "";
+    return <ResetPasswordPage token={token} />;
   }
   return (
     <AuthProvider>

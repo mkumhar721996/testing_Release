@@ -33,6 +33,22 @@ export async function activate(token: string, password: string): Promise<Activat
   };
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  // The API answers the same whether or not the email is registered.
+  await post("/auth/password-reset/request", { email });
+}
+
+export async function resetPassword(token: string, password: string): Promise<ActivateResult> {
+  const res = await post("/auth/password-reset/confirm", { token, password });
+  if (res.ok) return { ok: true };
+  const data = await res.json().catch(() => ({}));
+  return {
+    ok: false,
+    code: data.code ?? "password_reset_failed",
+    message: data.message ?? "Password reset failed.",
+  };
+}
+
 export async function getSession(): Promise<{ email: string } | null> {
   const res = await fetch(`${base()}/auth/session`, { credentials: "include" });
   if (!res.ok) return null;

@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { InvalidCredentialsError } from '../auth.errors';
 import { Clock } from '../clock';
 import { CognitoAuthPort } from '../cognito-auth.port';
 
@@ -103,6 +104,24 @@ export class FakeDataSource {
       releases.forEach((release) => release());
     }
   }
+}
+
+/** Cognito fake that keeps one password per email, so only the current one signs in. */
+export function statefulCognito(
+  initial: Record<string, string>,
+): jest.Mocked<CognitoAuthPort> {
+  const passwords = new Map(Object.entries(initial));
+  return {
+    signIn: jest.fn(async (email: string, password: string) => {
+      if (passwords.get(email) !== password) throw new InvalidCredentialsError();
+      return { refreshToken: 'r', sub: `sub-${email}` };
+    }),
+    signOut: jest.fn().mockResolvedValue(undefined),
+    setPermanentPassword: jest.fn(async (email: string, password: string) => {
+      passwords.set(email, password);
+    }),
+    enableUser: jest.fn().mockResolvedValue(undefined),
+  };
 }
 
 export function fakeCognito(): jest.Mocked<CognitoAuthPort> {

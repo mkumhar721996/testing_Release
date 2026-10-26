@@ -22,6 +22,18 @@ export class PasswordPolicyError extends Error {
   }
 }
 
+export class PasswordResetLinkInvalidError extends Error {
+  constructor() {
+    super('Password reset link invalid');
+  }
+}
+
+export class PasswordResetLinkExpiredError extends Error {
+  constructor() {
+    super('Password reset link expired');
+  }
+}
+
 export class ActivationLinkInvalidError extends Error {
   constructor() {
     super('Activation link invalid');

@@ -15,6 +15,14 @@ describe("SignInPage", () => {
     expect(screen.getByLabelText(/password/i)).toHaveAttribute("type", "password");
   });
 
+  it("links to the forgot password page", () => {
+    render(<SignInPage />);
+    expect(screen.getByRole("link", { name: /forgot password/i })).toHaveAttribute(
+      "href",
+      "/forgot-password",
+    );
+  });
+
   it("does not submit when the password is empty", async () => {
     signIn.mockReset();
     const user = userEvent.setup();

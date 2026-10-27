@@ -4,7 +4,10 @@ import userEvent from "@testing-library/user-event";
 import App from "./App";
 import * as client from "./auth/authClient";
 
+import * as shopClient from "./shop/shopClient";
+
 vi.mock("./auth/authClient");
+vi.mock("./shop/shopClient");
 
 afterEach(() => vi.resetAllMocks());
 
@@ -35,6 +38,14 @@ describe("App", () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
     render(<App />);
     expect(await screen.findByText("Signed in as ada@example.com")).toBeInTheDocument();
+  });
+
+  it("renders the shopping page at /shop when signed in", async () => {
+    vi.mocked(shopClient.listProducts).mockResolvedValue([]);
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
+    window.history.pushState({}, "", "/shop");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: /shop/i })).toBeInTheDocument();
   });
 
   it("shows the signed-in shell with a sign-out control", async () => {

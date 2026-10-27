@@ -5,6 +5,7 @@ import {
   Get,
   GoneException,
   HttpCode,
+  Logger,
   Post,
   Req,
   Res,
@@ -44,6 +45,8 @@ const cookieOptions = () => ({
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly auth: AuthService,
     private readonly activation: ActivationService,
@@ -55,7 +58,9 @@ export class AuthController {
   async requestPasswordReset(@Body() body: { email?: string }) {
     // The same response for every input, so the outcome is not observable.
     if (typeof body?.email === 'string') {
-      await this.passwordReset.request(body.email).catch(() => undefined);
+      await this.passwordReset.request(body.email).catch((err) => {
+        this.logger.error('Password reset request failed', err?.stack);
+      });
     }
     return { message: PASSWORD_RESET_REQUESTED_MESSAGE };
   }

@@ -140,6 +140,35 @@ describe('PasswordResetService', () => {
     expect(tokens.rows).toHaveLength(0);
   });
 
+  it('refuses a link whose account is no longer active', async () => {
+    const user = await makeUser('a@example.com');
+    const token = await requestToken();
+    await users.save({ ...user, status: 'pending' });
+    await expect(reset.redeem(token, PASSWORD)).rejects.toBeInstanceOf(
+      PasswordResetLinkInvalidError,
+    );
+    expect(cognito.setPermanentPassword).not.toHaveBeenCalled();
+  });
+
+  it('invalidates earlier links when a new one is requested', async () => {
+    await makeUser('a@example.com');
+    await reset.request('a@example.com');
+    await reset.request('a@example.com');
+    const [first, second] = notifier.notify.mock.calls.map((c) => c[1]);
+    await expect(reset.redeem(first, PASSWORD)).rejects.toBeInstanceOf(
+      PasswordResetLinkInvalidError,
+    );
+    await expect(reset.redeem(second, PASSWORD)).resolves.toBeUndefined();
+  });
+
+  it('invalidates other outstanding links once one is redeemed', async () => {
+    await makeUser('a@example.com');
+    await reset.request('a@example.com');
+    const [first] = notifier.notify.mock.calls.map((c) => c[1]);
+    await reset.redeem(first, PASSWORD);
+    expect(tokens.rows.every((r) => r.usedAt !== null)).toBe(true);
+  });
+
   it('unlocks a locked account after reset', async () => {
     const user = await makeUser('a@example.com');
     await users.save({

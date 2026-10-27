@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { PASSWORD_RESET_TOKEN_TTL_MS } from './auth.constants';
 import {
   PasswordResetLinkExpiredError,
@@ -43,6 +43,12 @@ export class PasswordResetService {
     const expiresAt = new Date(
       this.clock.now().getTime() + PASSWORD_RESET_TOKEN_TTL_MS,
     );
+    const now = this.clock.now();
+    // Only the newest link works.
+    await this.tokens.update(
+      { userId: user.id, usedAt: IsNull() },
+      { usedAt: now },
+    );
     await this.tokens.save({
       userId: user.id,
       tokenHash: hash(token),
@@ -65,16 +71,20 @@ export class PasswordResetService {
         throw new PasswordResetLinkExpiredError();
       }
       const user = await manager.findOne(User, { where: { id: row.userId } });
-      if (!user) throw new PasswordResetLinkInvalidError();
+      // Status may have changed since the link was issued.
+      if (!user || user.status !== 'active') {
+        throw new PasswordResetLinkInvalidError();
+      }
 
       // A policy rejection throws here, rolling back with the link unused. If
       // the commit below fails after Cognito changed, the link is still unused
       // and the Cognito call is idempotent, so retrying the link is safe.
       await this.cognito.setPermanentPassword(user.email, password);
       await manager.update(User, { id: user.id }, afterSuccess());
+      // Consumes this link and any other outstanding ones for the user.
       await manager.update(
         PasswordResetToken,
-        { id: row.id },
+        { userId: user.id, usedAt: IsNull() },
         { usedAt: now },
       );
     });

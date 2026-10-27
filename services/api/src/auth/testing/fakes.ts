@@ -54,7 +54,13 @@ export class FakeRepo<T extends { id?: string }> {
   async update(where: Partial<T>, partial: Partial<T>): Promise<void> {
     this.stored
       .filter((r) =>
-        Object.entries(where).every(([k, v]) => (r as never)[k] === v),
+        Object.entries(where).every(([k, v]) => {
+          const actual = (r as never)[k];
+          // Understands TypeORM's IsNull() operator.
+          return (v as { _type?: string } | null)?._type === 'isNull'
+            ? actual === null
+            : actual === v;
+        }),
       )
       .forEach((r) => Object.assign(r, structuredClone(partial)));
   }

@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AdminCreateUserCommand,
+  AdminDeleteUserCommand,
   AdminEnableUserCommand,
   AdminGetUserCommand,
   AdminSetUserPasswordCommand,
@@ -8,7 +10,11 @@ import {
   InitiateAuthCommand,
   RevokeTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { InvalidCredentialsError, PasswordPolicyError } from './auth.errors';
+import {
+  EmailAlreadyRegisteredError,
+  InvalidCredentialsError,
+  PasswordPolicyError,
+} from './auth.errors';
 import { CognitoAuthPort } from './cognito-auth.port';
 
 @Injectable()
@@ -94,6 +100,51 @@ export class AwsCognitoAuth implements CognitoAuthPort {
   async enableUser(email: string): Promise<void> {
     await this.client.send(
       new AdminEnableUserCommand({ UserPoolId: this.poolId, Username: email }),
+    );
+  }
+
+  async createUser(email: string, password: string): Promise<{ sub: string }> {
+    let created;
+    try {
+      created = await this.client.send(
+        new AdminCreateUserCommand({
+          UserPoolId: this.poolId,
+          Username: email,
+          UserAttributes: [
+            { Name: 'email', Value: email },
+            { Name: 'email_verified', Value: 'false' },
+          ],
+          MessageAction: 'SUPPRESS',
+        }),
+      );
+    } catch (err) {
+      if ((err as Error).name === 'UsernameExistsException') {
+        throw new EmailAlreadyRegisteredError();
+      }
+      throw err;
+    }
+    try {
+      await this.setPermanentPassword(email, password);
+    } catch (err) {
+      // Best effort: do not leave a user without a usable password behind.
+      await this.deleteUser(email).catch((cleanupErr) =>
+        this.logger.error(
+          `Orphaned Cognito user after failed registration: ${(cleanupErr as Error).name}`,
+        ),
+      );
+      throw err;
+    }
+    return {
+      sub:
+        created.User?.Attributes?.find((a) => a.Name === 'sub')?.Value ??
+        created.User?.Username ??
+        '',
+    };
+  }
+
+  async deleteUser(email: string): Promise<void> {
+    await this.client.send(
+      new AdminDeleteUserCommand({ UserPoolId: this.poolId, Username: email }),
     );
   }
 }

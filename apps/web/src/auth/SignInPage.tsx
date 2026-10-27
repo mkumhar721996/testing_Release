@@ -54,6 +54,9 @@ export function SignInPage() {
         <a href="/forgot-password" className="block text-sm text-slate-900 underline">
           Forgot password?
         </a>
+        <a href="/register" className="block text-sm text-slate-900 underline">
+          Register
+        </a>
       </form>
     </main>
   );

@@ -54,3 +54,16 @@ export async function resetPassword(token: string, password: string): Promise<Ac
     message: data.message ?? "Password reset failed.",
   };
 }
+
+export type RegisterResult = { ok: true } | { ok: false; code: string; message: string };
+
+export async function register(email: string, password: string): Promise<RegisterResult> {
+  const res = await post("/auth/register", { email, password });
+  if (res.ok) return { ok: true };
+  const data = await res.json().catch(() => ({}));
+  return {
+    ok: false,
+    code: data.code ?? "registration_failed",
+    message: data.message ?? "Registration failed.",
+  };
+}

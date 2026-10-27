@@ -38,6 +38,7 @@ import {
 } from './auth.errors';
 import { AuthService } from './auth.service';
 import { PasswordResetService } from './password-reset.service';
+import { RegisterRateLimitGuard } from './register-rate-limit.guard';
 import { RegistrationService } from './registration.service';
 import { SessionGuard } from './session.guard';
 
@@ -60,6 +61,8 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  // An instance (not a class) keeps one shared hit counter for the process.
+  @UseGuards(new RegisterRateLimitGuard())
   @HttpCode(201)
   async register(@Body() body: { email?: string; password?: string }) {
     if (

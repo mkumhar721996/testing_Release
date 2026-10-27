@@ -21,11 +21,18 @@ export class RegistrationService {
       throw new EmailAlreadyRegisteredError();
     }
     const { sub } = await this.cognito.signUp(normalised, password);
-    const user = await this.users.save({
-      email: normalised,
-      cognitoSub: sub,
-      status: 'active',
-    } as User);
+    let user: User;
+    try {
+      user = await this.users.save({
+        email: normalised,
+        cognitoSub: sub,
+        status: 'active',
+      } as User);
+    } catch (err) {
+      // No local row: do not leave a Cognito user that blocks a retry.
+      await this.cognito.deleteUser(normalised).catch(() => undefined);
+      throw err;
+    }
     return { id: user.id, email: user.email };
   }
 }

@@ -47,6 +47,15 @@ describe('RegistrationService', () => {
     expect(cognito.signUp).not.toHaveBeenCalled();
   });
 
+  it('removes the Cognito user when saving the row fails', async () => {
+    cognito.signUp.mockResolvedValue({ sub: 'sub-1' });
+    jest.spyOn(users, 'save').mockRejectedValue(new Error('db down'));
+    await expect(registration.register('a@b.com', PASSWORD)).rejects.toThrow(
+      'db down',
+    );
+    expect(cognito.deleteUser).toHaveBeenCalledWith('a@b.com');
+  });
+
   it('creates no row when Cognito rejects the password', async () => {
     cognito.signUp.mockRejectedValue(new PasswordPolicyError());
     await expect(registration.register('a@b.com', 'x')).rejects.toBeInstanceOf(

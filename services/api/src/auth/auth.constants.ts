@@ -9,6 +9,8 @@ export const ACTIVATION_EXPIRED_MESSAGE =
 export const PASSWORD_POLICY_MESSAGE =
   'That password does not meet the password requirements. Choose a different one.';
 export const ACTIVATION_INVALID_MESSAGE = 'This activation link is not valid.';
+export const REGISTER_RATE_LIMIT = 5;
+export const REGISTER_RATE_WINDOW_MS = 60 * 1000;
 export const REGISTRATION_INVALID_MESSAGE =
   'Enter an email address and a password.';
 export const EMAIL_TAKEN_MESSAGE = 'An account with that email already exists.';

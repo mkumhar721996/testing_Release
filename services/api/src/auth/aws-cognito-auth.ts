@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   AdminCreateUserCommand,
+  AdminDeleteUserCommand,
   AdminEnableUserCommand,
   AdminGetUserCommand,
   AdminSetUserPasswordCommand,
@@ -105,7 +106,6 @@ export class AwsCognitoAuth implements CognitoAuthPort {
           Username: email,
           UserAttributes: [
             { Name: 'email', Value: email },
-            { Name: 'email_verified', Value: 'true' },
           ],
           MessageAction: 'SUPPRESS',
         }),
@@ -116,14 +116,29 @@ export class AwsCognitoAuth implements CognitoAuthPort {
       }
       throw err;
     }
-    // Two calls: if this one fails the Cognito user is left without a usable
-    // password, and re-registering the same email is refused until it is removed.
-    await this.setPermanentPassword(email, password);
+    // Two calls: if setting the password fails, remove the user just created so a
+    // rejected password cannot squat the email.
+    try {
+      await this.setPermanentPassword(email, password);
+    } catch (err) {
+      await this.deleteUser(email).catch((cleanupErr) =>
+        this.logger.error(
+          `Cognito cleanup failed: ${(cleanupErr as Error).name}`,
+        ),
+      );
+      throw err;
+    }
     return {
       sub:
         created.User?.Attributes?.find((a) => a.Name === 'sub')?.Value ??
         (await this.subFor(email)),
     };
+  }
+
+  async deleteUser(email: string): Promise<void> {
+    await this.client.send(
+      new AdminDeleteUserCommand({ UserPoolId: this.poolId, Username: email }),
+    );
   }
 
   async enableUser(email: string): Promise<void> {

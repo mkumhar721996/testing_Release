@@ -43,6 +43,18 @@ describe("SignInPage", () => {
     expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument();
   });
 
+  it("submits the typed credentials and shows no error on success (AC1)", async () => {
+    signIn.mockReset();
+    signIn.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    render(<SignInPage />);
+    await user.type(screen.getByLabelText(/email/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/password/i), "test-password");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    expect(signIn).toHaveBeenCalledWith("ada@example.com", "test-password");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("shows exactly the server's generic message and nothing else in the alert (AC7)", async () => {
     signIn.mockResolvedValue({ ok: false, message: GENERIC });
     const user = userEvent.setup();

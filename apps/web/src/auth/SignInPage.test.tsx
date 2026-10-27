@@ -15,6 +15,18 @@ describe("SignInPage", () => {
     expect(screen.getByLabelText(/password/i)).toHaveAttribute("type", "password");
   });
 
+  it("submits a valid email and password and shows no error (AC1)", async () => {
+    signIn.mockReset();
+    signIn.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    render(<SignInPage />);
+    await user.type(screen.getByLabelText(/email/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/password/i), "test-password");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    expect(signIn).toHaveBeenCalledWith("ada@example.com", "test-password");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("links to the forgot-password page", () => {
     render(<SignInPage />);
     expect(screen.getByRole("link", { name: /forgot password\?/i })).toHaveAttribute(

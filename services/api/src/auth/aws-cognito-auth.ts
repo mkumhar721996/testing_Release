@@ -112,7 +112,7 @@ export class AwsCognitoAuth implements CognitoAuthPort {
           Username: email,
           UserAttributes: [
             { Name: 'email', Value: email },
-            { Name: 'email_verified', Value: 'true' },
+            { Name: 'email_verified', Value: 'false' },
           ],
           MessageAction: 'SUPPRESS',
         }),
@@ -127,7 +127,11 @@ export class AwsCognitoAuth implements CognitoAuthPort {
       await this.setPermanentPassword(email, password);
     } catch (err) {
       // Best effort: do not leave a user without a usable password behind.
-      await this.deleteUser(email).catch(() => undefined);
+      await this.deleteUser(email).catch((cleanupErr) =>
+        this.logger.error(
+          `Orphaned Cognito user after failed registration: ${(cleanupErr as Error).name}`,
+        ),
+      );
       throw err;
     }
     return {

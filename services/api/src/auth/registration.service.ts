@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EmailAlreadyRegisteredError } from './auth.errors';
@@ -7,6 +7,8 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class RegistrationService {
+  private readonly logger = new Logger(RegistrationService.name);
+
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     @Inject(COGNITO_AUTH) private readonly cognito: CognitoAuthPort,
@@ -33,7 +35,11 @@ export class RegistrationService {
       return { id: user.id, email: user.email };
     } catch (err) {
       // No half-registered account: drop the Cognito user the row never joined.
-      await this.cognito.deleteUser(email).catch(() => undefined);
+      await this.cognito.deleteUser(email).catch((cleanupErr) =>
+        this.logger.error(
+          `Orphaned Cognito user after failed registration: ${(cleanupErr as Error).name}`,
+        ),
+      );
       throw err;
     }
   }

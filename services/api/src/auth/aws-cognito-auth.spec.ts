@@ -79,6 +79,17 @@ describe('AwsCognitoAuth', () => {
     expect(send).toHaveBeenCalledTimes(3);
   });
 
+  it('does not mark the unproven email as verified', async () => {
+    const auth = new AwsCognitoAuth(new ConfigService({}));
+    const send = jest.fn().mockResolvedValue({ User: { Username: 'u' } });
+    (auth as unknown as { client: unknown }).client = { send };
+    await auth.createUser('a@example.com', 'pw');
+    expect(send.mock.calls[0][0].input.UserAttributes).toContainEqual({
+      Name: 'email_verified',
+      Value: 'false',
+    });
+  });
+
   it('returns the sub of the created user', async () => {
     const auth = new AwsCognitoAuth(new ConfigService({}));
     const send = jest

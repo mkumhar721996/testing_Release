@@ -34,8 +34,12 @@ test.describe("with valid credentials", () => {
     await expect(dropdown).toBeVisible();
     const label = await dropdown.locator("option").nth(1).innerText();
     await dropdown.selectOption({ label });
-    await expect(page.getByText(label).first()).toBeVisible();
-    await expect(dropdown).toHaveValue(/.+/);
+    // The arc page names the selected project outside the dropdown's own
+    // <option>/<select> elements, and the login form is gone.
+    await expect(
+      page.getByText(label, { exact: true }).and(page.locator(":not(option):not(select)")).first(),
+    ).toBeVisible();
+    await expect(page.getByLabel(PASSWORD)).toHaveCount(0);
   });
 });
 

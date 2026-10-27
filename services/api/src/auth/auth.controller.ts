@@ -18,15 +18,21 @@ import {
   ACTIVATION_INVALID_MESSAGE,
   GENERIC_REFUSAL_MESSAGE,
   PASSWORD_POLICY_MESSAGE,
+  PASSWORD_RESET_EXPIRED_MESSAGE,
+  PASSWORD_RESET_INVALID_MESSAGE,
+  PASSWORD_RESET_REQUESTED_MESSAGE,
   SESSION_COOKIE,
 } from './auth.constants';
 import {
   ActivationLinkExpiredError,
   ActivationLinkInvalidError,
   PasswordPolicyError,
+  PasswordResetLinkExpiredError,
+  PasswordResetLinkInvalidError,
   SignInRefusedError,
 } from './auth.errors';
 import { AuthService } from './auth.service';
+import { PasswordResetService } from './password-reset.service';
 import { SessionGuard } from './session.guard';
 
 const cookieOptions = () => ({
@@ -41,7 +47,56 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly activation: ActivationService,
+    private readonly passwordReset: PasswordResetService,
   ) {}
+
+  @Post('password-reset/request')
+  @HttpCode(202)
+  async requestPasswordReset(@Body() body: { email?: string }) {
+    // The same response for every input, so the outcome is not observable.
+    if (typeof body?.email === 'string') {
+      await this.passwordReset.request(body.email).catch(() => undefined);
+    }
+    return { message: PASSWORD_RESET_REQUESTED_MESSAGE };
+  }
+
+  @Post('password-reset/confirm')
+  @HttpCode(200)
+  async confirmPasswordReset(
+    @Body() body: { token?: string; password?: string },
+  ) {
+    try {
+      if (
+        typeof body?.token !== 'string' ||
+        typeof body?.password !== 'string' ||
+        !body.password
+      ) {
+        throw new PasswordResetLinkInvalidError();
+      }
+      await this.passwordReset.redeem(body.token, body.password);
+      return { status: 'password_reset' };
+    } catch (err) {
+      if (err instanceof PasswordResetLinkExpiredError) {
+        throw new GoneException({
+          code: 'password_reset_link_expired',
+          message: PASSWORD_RESET_EXPIRED_MESSAGE,
+        });
+      }
+      if (err instanceof PasswordPolicyError) {
+        throw new BadRequestException({
+          code: 'password_policy',
+          message: PASSWORD_POLICY_MESSAGE,
+        });
+      }
+      if (err instanceof PasswordResetLinkInvalidError) {
+        throw new BadRequestException({
+          code: 'password_reset_link_invalid',
+          message: PASSWORD_RESET_INVALID_MESSAGE,
+        });
+      }
+      throw err;
+    }
+  }
 
   @Post('sign-in')
   @HttpCode(200)

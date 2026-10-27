@@ -27,3 +27,15 @@ export class ActivationLinkInvalidError extends Error {
     super('Activation link invalid');
   }
 }
+
+export class PasswordResetLinkExpiredError extends Error {
+  constructor() {
+    super('Password reset link expired');
+  }
+}
+
+export class PasswordResetLinkInvalidError extends Error {
+  constructor() {
+    super('Password reset link invalid');
+  }
+}

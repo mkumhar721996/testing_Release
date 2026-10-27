@@ -7,17 +7,32 @@ import { AwsCognitoAuth } from './aws-cognito-auth';
 import { Clock, SystemClock } from './clock';
 import { COGNITO_AUTH } from './cognito-auth.port';
 import { ActivationToken } from './entities/activation-token.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { Session } from './entities/session.entity';
 import { User } from './entities/user.entity';
+import {
+  LoggingPasswordResetNotifier,
+  PASSWORD_RESET_NOTIFIER,
+} from './password-reset.notifier';
+import { PasswordResetService } from './password-reset.service';
 import { SessionGuard } from './session.guard';
 import { SessionService } from './session.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, ActivationToken, Session])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      ActivationToken,
+      PasswordResetToken,
+      Session,
+    ]),
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
     ActivationService,
+    PasswordResetService,
+    { provide: PASSWORD_RESET_NOTIFIER, useClass: LoggingPasswordResetNotifier },
     SessionService,
     SessionGuard,
     { provide: Clock, useClass: SystemClock },

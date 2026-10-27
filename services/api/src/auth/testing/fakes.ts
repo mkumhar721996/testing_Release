@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { Clock } from '../clock';
 import { CognitoAuthPort } from '../cognito-auth.port';
+import { PasswordResetNotifier } from '../password-reset.notifier';
 
 export class FakeClock extends Clock {
   constructor(private current: Date) {
@@ -111,5 +112,15 @@ export function fakeCognito(): jest.Mocked<CognitoAuthPort> {
     signOut: jest.fn().mockResolvedValue(undefined),
     setPermanentPassword: jest.fn().mockResolvedValue(undefined),
     enableUser: jest.fn().mockResolvedValue(undefined),
+  };
+}
+
+export function fakeNotifier(): jest.Mocked<PasswordResetNotifier> & {
+  lastToken(): string;
+} {
+  const notify = jest.fn().mockResolvedValue(undefined);
+  return {
+    notify,
+    lastToken: () => notify.mock.calls[notify.mock.calls.length - 1][1],
   };
 }

@@ -117,6 +117,28 @@ describe('Auth (e2e)', () => {
     expect(res.body).toEqual(GENERIC);
   });
 
+  it('leaves the user not signed in after a wrong password', async () => {
+    const user = await makeUser();
+    cognito.signIn.mockRejectedValue(new InvalidCredentialsError());
+    const agent = request.agent(app.getHttpServer());
+    const res = await agent
+      .post('/auth/sign-in')
+      .send({ email: user.email, password: 'wrong' })
+      .expect(401);
+    expect(res.headers['set-cookie']).toBeUndefined();
+    await agent.get('/auth/session').expect(401);
+  });
+
+  it('leaves the user not signed in for an unregistered account', async () => {
+    const agent = request.agent(app.getHttpServer());
+    await agent
+      .post('/auth/sign-in')
+      .send({ email: 'nobody@example.com', password: 'anything' })
+      .expect(401);
+    expect(cognito.signIn).not.toHaveBeenCalled();
+    await agent.get('/auth/session').expect(401);
+  });
+
   it('refuses an empty password without a cookie or a Cognito call', async () => {
     const user = await makeUser();
     const res = await signIn(user.email, '').expect(401);

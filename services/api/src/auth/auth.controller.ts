@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Get,
   GoneException,
@@ -17,16 +18,19 @@ import { ActivationService } from './activation.service';
 import {
   ACTIVATION_EXPIRED_MESSAGE,
   ACTIVATION_INVALID_MESSAGE,
+  EMAIL_ALREADY_REGISTERED_MESSAGE,
   GENERIC_REFUSAL_MESSAGE,
   PASSWORD_POLICY_MESSAGE,
   PASSWORD_RESET_EXPIRED_MESSAGE,
   PASSWORD_RESET_INVALID_MESSAGE,
   PASSWORD_RESET_REQUESTED_MESSAGE,
+  REGISTRATION_INVALID_MESSAGE,
   SESSION_COOKIE,
 } from './auth.constants';
 import {
   ActivationLinkExpiredError,
   ActivationLinkInvalidError,
+  EmailAlreadyRegisteredError,
   PasswordPolicyError,
   PasswordResetLinkExpiredError,
   PasswordResetLinkInvalidError,
@@ -34,6 +38,7 @@ import {
 } from './auth.errors';
 import { AuthService } from './auth.service';
 import { PasswordResetService } from './password-reset.service';
+import { RegistrationService } from './registration.service';
 import { SessionGuard } from './session.guard';
 
 const cookieOptions = () => ({
@@ -51,7 +56,41 @@ export class AuthController {
     private readonly auth: AuthService,
     private readonly activation: ActivationService,
     private readonly passwordReset: PasswordResetService,
+    private readonly registration: RegistrationService,
   ) {}
+
+  @Post('register')
+  @HttpCode(201)
+  async register(@Body() body: { email?: string; password?: string }) {
+    try {
+      if (
+        typeof body?.email !== 'string' ||
+        typeof body?.password !== 'string' ||
+        !body.email.trim() ||
+        !body.password
+      ) {
+        throw new BadRequestException({
+          code: 'registration_invalid',
+          message: REGISTRATION_INVALID_MESSAGE,
+        });
+      }
+      return await this.registration.register(body.email, body.password);
+    } catch (err) {
+      if (err instanceof EmailAlreadyRegisteredError) {
+        throw new ConflictException({
+          code: 'email_already_registered',
+          message: EMAIL_ALREADY_REGISTERED_MESSAGE,
+        });
+      }
+      if (err instanceof PasswordPolicyError) {
+        throw new BadRequestException({
+          code: 'password_policy',
+          message: PASSWORD_POLICY_MESSAGE,
+        });
+      }
+      throw err;
+    }
+  }
 
   @Post('password-reset/request')
   @HttpCode(202)

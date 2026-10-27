@@ -118,6 +118,8 @@ export function fakeCognito(): jest.Mocked<CognitoAuthPort> {
     signOut: jest.fn().mockResolvedValue(undefined),
     setPermanentPassword: jest.fn().mockResolvedValue(undefined),
     enableUser: jest.fn().mockResolvedValue(undefined),
+    createUser: jest.fn(),
+    deleteUser: jest.fn().mockResolvedValue(undefined),
   };
 }
 

@@ -213,6 +213,24 @@ describe('Auth (e2e)', () => {
     expect(res.body.code).toBe('password_reset_link_expired');
   });
 
+  it('registers a visitor and validates the body (AC2)', async () => {
+    cognito.signUp.mockResolvedValue({ sub: 'sub-new' });
+    const email = `reg${Date.now()}@example.com`;
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ email, password: PASSWORD })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ email, password: PASSWORD })
+      .expect(409);
+    const res = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ email })
+      .expect(400);
+    expect(res.body.code).toBe('registration_invalid');
+  });
+
   it('refuses an expired link and asks for a new email (AC9, AC10)', async () => {
     const user = await makeUser('pending');
     const { token } = await activation.issue(user.id);

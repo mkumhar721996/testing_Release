@@ -33,6 +33,19 @@ export async function activate(token: string, password: string): Promise<Activat
   };
 }
 
+export type RegisterResult = { ok: true } | { ok: false; code: string; message: string };
+
+export async function register(email: string, password: string): Promise<RegisterResult> {
+  const res = await post("/auth/register", { email, password });
+  if (res.ok) return { ok: true };
+  const data = await res.json().catch(() => ({}));
+  return {
+    ok: false,
+    code: data.code ?? "registration_failed",
+    message: data.message ?? "Registration failed.",
+  };
+}
+
 export async function getSession(): Promise<{ email: string } | null> {
   const res = await fetch(`${base()}/auth/session`, { credentials: "include" });
   if (!res.ok) return null;

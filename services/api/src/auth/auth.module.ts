@@ -15,6 +15,7 @@ import {
   PASSWORD_RESET_NOTIFIER,
 } from './password-reset.notifier';
 import { PasswordResetService } from './password-reset.service';
+import { RegistrationService } from './registration.service';
 import { SessionGuard } from './session.guard';
 import { SessionService } from './session.service';
 
@@ -32,6 +33,7 @@ import { SessionService } from './session.service';
     AuthService,
     ActivationService,
     PasswordResetService,
+    RegistrationService,
     { provide: PASSWORD_RESET_NOTIFIER, useClass: LoggingPasswordResetNotifier },
     SessionService,
     SessionGuard,

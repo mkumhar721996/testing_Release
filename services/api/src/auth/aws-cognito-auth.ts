@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AdminCreateUserCommand,
+  AdminDeleteUserCommand,
   AdminEnableUserCommand,
   AdminGetUserCommand,
   AdminSetUserPasswordCommand,
@@ -8,7 +10,11 @@ import {
   InitiateAuthCommand,
   RevokeTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { InvalidCredentialsError, PasswordPolicyError } from './auth.errors';
+import {
+  EmailAlreadyRegisteredError,
+  InvalidCredentialsError,
+  PasswordPolicyError,
+} from './auth.errors';
 import { CognitoAuthPort } from './cognito-auth.port';
 
 @Injectable()
@@ -89,6 +95,50 @@ export class AwsCognitoAuth implements CognitoAuthPort {
       }
       throw err;
     }
+  }
+
+  async signUp(email: string, password: string): Promise<{ sub: string }> {
+    let created;
+    try {
+      created = await this.client.send(
+        new AdminCreateUserCommand({
+          UserPoolId: this.poolId,
+          Username: email,
+          UserAttributes: [
+            { Name: 'email', Value: email },
+          ],
+          MessageAction: 'SUPPRESS',
+        }),
+      );
+    } catch (err) {
+      if ((err as Error).name === 'UsernameExistsException') {
+        throw new EmailAlreadyRegisteredError();
+      }
+      throw err;
+    }
+    // Two calls: if setting the password fails, remove the user just created so a
+    // rejected password cannot squat the email.
+    try {
+      await this.setPermanentPassword(email, password);
+    } catch (err) {
+      await this.deleteUser(email).catch((cleanupErr) =>
+        this.logger.error(
+          `Cognito cleanup failed: ${(cleanupErr as Error).name}`,
+        ),
+      );
+      throw err;
+    }
+    return {
+      sub:
+        created.User?.Attributes?.find((a) => a.Name === 'sub')?.Value ??
+        (await this.subFor(email)),
+    };
+  }
+
+  async deleteUser(email: string): Promise<void> {
+    await this.client.send(
+      new AdminDeleteUserCommand({ UserPoolId: this.poolId, Username: email }),
+    );
   }
 
   async enableUser(email: string): Promise<void> {

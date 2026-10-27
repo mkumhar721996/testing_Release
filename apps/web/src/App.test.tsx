@@ -31,6 +31,21 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
   });
 
+  it("hides the sign-in form after a valid sign-in (AC1)", async () => {
+    vi.mocked(client.getSession)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue({ email: "ada@example.com" });
+    vi.mocked(client.signIn).mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    render(<App />);
+    await user.type(await screen.findByLabelText(/email/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/password/i), "test-password");
+    await user.click(screen.getByRole("button", { name: "Sign in" }));
+    expect(await screen.findByText("Signed in as ada@example.com")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Sign in" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
+  });
+
   it("shows who is signed in", async () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
     render(<App />);

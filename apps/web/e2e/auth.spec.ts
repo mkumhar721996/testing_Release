@@ -16,21 +16,28 @@ test("a refused sign-in shows only the generic message", async ({ page }) => {
   await expect(page.getByRole("alert")).toHaveText(GENERIC);
 });
 
-test("a successful sign-in shows the user as signed in", async ({ page }) => {
+test("a successful sign-in shows the user as signed in and removes the form (AC1)", async ({
+  page,
+}) => {
+  let signedIn = false;
   await page.route("**/auth/session", (r) =>
-    r.fulfill({ status: 401, json: { code: "session_expired" } }),
+    signedIn
+      ? r.fulfill({ status: 200, json: { user: { id: "u1", email: "ada@example.com" } } })
+      : r.fulfill({ status: 401, json: { code: "session_expired" } }),
   );
-  await page.route("**/auth/sign-in", (r) =>
-    r.fulfill({
+  await page.route("**/auth/sign-in", (r) => {
+    signedIn = true;
+    return r.fulfill({
       status: 200,
       json: { status: "signed_in", user: { id: "u1", email: "ada@example.com" } },
-    }),
-  );
+    });
+  });
   await page.goto("/");
   await page.getByLabel("Email").fill("ada@example.com");
   await page.getByLabel("Password").fill("test-password");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText("Signed in as ada@example.com")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in" })).toHaveCount(0);
 });
 
 test("an expired activation link asks for a new email", async ({ page }) => {

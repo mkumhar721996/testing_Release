@@ -31,6 +31,17 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "Sign in" })).toBeInTheDocument();
   });
 
+  it("shows a login option once loading finishes", async () => {
+    let resolve!: (v: null) => void;
+    vi.mocked(client.getSession).mockReturnValue(new Promise((r) => (resolve = r)));
+    render(<App />);
+    expect(screen.queryByRole("button", { name: "Sign in" })).not.toBeInTheDocument();
+    resolve(null);
+    expect(await screen.findByRole("button", { name: "Sign in" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+  });
+
   it("shows who is signed in", async () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
     render(<App />);

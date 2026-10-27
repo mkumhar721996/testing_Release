@@ -13,7 +13,8 @@
     "preview": "vite preview --port=4173 --strictPort",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:qa": "playwright test -c playwright.qa.config.ts"
   },
   "dependencies": {
     "@testing-library/user-event": "^14.6.8",

@@ -7,6 +7,8 @@ export interface CognitoAuthPort {
   signOut(refreshToken: string): Promise<void>;
   setPermanentPassword(email: string, password: string): Promise<void>;
   enableUser(email: string): Promise<void>;
+  /** Creates a confirmed user. Throws EmailAlreadyRegisteredError or PasswordPolicyError. */
+  signUp(email: string, password: string): Promise<{ sub: string }>;
 }
 
 export const COGNITO_AUTH = Symbol('COGNITO_AUTH');

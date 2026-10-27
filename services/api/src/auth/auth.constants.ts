@@ -9,6 +9,9 @@ export const ACTIVATION_EXPIRED_MESSAGE =
 export const PASSWORD_POLICY_MESSAGE =
   'That password does not meet the password requirements. Choose a different one.';
 export const ACTIVATION_INVALID_MESSAGE = 'This activation link is not valid.';
+export const REGISTRATION_INVALID_MESSAGE =
+  'Enter an email address and a password.';
+export const EMAIL_TAKEN_MESSAGE = 'An account with that email already exists.';
 export const PASSWORD_RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 export const PASSWORD_RESET_REQUESTED_MESSAGE =
   'If an account exists for that email, a password reset link has been sent.';

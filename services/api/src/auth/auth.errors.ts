@@ -16,6 +16,12 @@ export class ActivationLinkExpiredError extends Error {
   }
 }
 
+export class EmailAlreadyRegisteredError extends Error {
+  constructor() {
+    super('Email already registered');
+  }
+}
+
 export class PasswordPolicyError extends Error {
   constructor() {
     super('Password does not meet the password policy');

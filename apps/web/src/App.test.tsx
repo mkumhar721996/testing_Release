@@ -14,6 +14,14 @@ afterEach(() => vi.resetAllMocks());
 describe("App", () => {
   afterEach(() => window.history.pushState({}, "", "/"));
 
+  it("renders the shopping page with a Register control at /shop when signed out (AC1)", async () => {
+    vi.mocked(client.getSession).mockResolvedValue(null);
+    window.history.pushState({}, "", "/shop");
+    render(<App />);
+    expect(await screen.findByRole("button", { name: /register/i })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Sign in" })).not.toBeInTheDocument();
+  });
+
   it("renders the forgot-password page at /forgot-password", () => {
     window.history.pushState({}, "", "/forgot-password");
     render(<App />);

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AdminCreateUserCommand,
   AdminEnableUserCommand,
   AdminGetUserCommand,
   AdminSetUserPasswordCommand,
@@ -8,7 +9,11 @@ import {
   InitiateAuthCommand,
   RevokeTokenCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { InvalidCredentialsError, PasswordPolicyError } from './auth.errors';
+import {
+  EmailAlreadyRegisteredError,
+  InvalidCredentialsError,
+  PasswordPolicyError,
+} from './auth.errors';
 import { CognitoAuthPort } from './cognito-auth.port';
 
 @Injectable()
@@ -89,6 +94,36 @@ export class AwsCognitoAuth implements CognitoAuthPort {
       }
       throw err;
     }
+  }
+
+  async signUp(email: string, password: string): Promise<{ sub: string }> {
+    let created;
+    try {
+      created = await this.client.send(
+        new AdminCreateUserCommand({
+          UserPoolId: this.poolId,
+          Username: email,
+          UserAttributes: [
+            { Name: 'email', Value: email },
+            { Name: 'email_verified', Value: 'true' },
+          ],
+          MessageAction: 'SUPPRESS',
+        }),
+      );
+    } catch (err) {
+      if ((err as Error).name === 'UsernameExistsException') {
+        throw new EmailAlreadyRegisteredError();
+      }
+      throw err;
+    }
+    // Two calls: if this one fails the Cognito user is left without a usable
+    // password, and re-registering the same email is refused until it is removed.
+    await this.setPermanentPassword(email, password);
+    return {
+      sub:
+        created.User?.Attributes?.find((a) => a.Name === 'sub')?.Value ??
+        (await this.subFor(email)),
+    };
   }
 
   async enableUser(email: string): Promise<void> {

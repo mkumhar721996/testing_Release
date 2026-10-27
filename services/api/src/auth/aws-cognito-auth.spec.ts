@@ -1,6 +1,14 @@
 import { ConfigService } from '@nestjs/config';
 import { AwsCognitoAuth } from './aws-cognito-auth';
-import { InvalidCredentialsError, PasswordPolicyError } from './auth.errors';
+import {
+  AdminCreateUserCommand,
+  AdminSetUserPasswordCommand,
+} from '@aws-sdk/client-cognito-identity-provider';
+import {
+  EmailAlreadyRegisteredError,
+  InvalidCredentialsError,
+  PasswordPolicyError,
+} from './auth.errors';
 
 describe('AwsCognitoAuth', () => {
   const build = (response: unknown) => {
@@ -49,5 +57,25 @@ describe('AwsCognitoAuth', () => {
     await expect(
       failing('InvalidPasswordException').setPermanentPassword('a@b.c', 'weak'),
     ).rejects.toBeInstanceOf(PasswordPolicyError);
+  });
+
+  it('signUp creates the user then sets a permanent password and returns the sub (AC2)', async () => {
+    const auth = build({
+      User: { Attributes: [{ Name: 'sub', Value: 'sub-9' }] },
+    });
+    const send = (auth as unknown as { client: { send: jest.Mock } }).client
+      .send;
+    await expect(auth.signUp('a@b.com', 'test-password')).resolves.toEqual({
+      sub: 'sub-9',
+    });
+    expect(send.mock.calls[0][0]).toBeInstanceOf(AdminCreateUserCommand);
+    expect(send.mock.calls[1][0]).toBeInstanceOf(AdminSetUserPasswordCommand);
+    expect(send.mock.calls[1][0].input.Permanent).toBe(true);
+  });
+
+  it('maps UsernameExistsException on sign-up to EmailAlreadyRegisteredError', async () => {
+    await expect(
+      failing('UsernameExistsException').signUp('a@b.com', 'test-password'),
+    ).rejects.toBeInstanceOf(EmailAlreadyRegisteredError);
   });
 });

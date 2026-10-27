@@ -20,6 +20,16 @@ describe("ShoppingPage", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("Order placed");
   });
 
+  it("shows a registration form when a signed-out visitor chooses to register (AC1)", async () => {
+    render(<ShoppingPage signedIn={false} />);
+    expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: /register/i }));
+    expect(screen.getByRole("heading", { name: /shop/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(client.listProducts).not.toHaveBeenCalled();
+  });
+
   it("shows an alert when the order fails", async () => {
     vi.mocked(client.listProducts).mockResolvedValue([iphone]);
     vi.mocked(client.placeOrder).mockResolvedValue({ ok: false, message: "Product not found." });

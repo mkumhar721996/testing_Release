@@ -8,7 +8,10 @@ import { ShoppingPage } from "./shop/ShoppingPage";
 function Shell() {
   const { user, loading, signOut } = useAuth();
   if (loading) return null;
-  if (!user) return <SignInPage />;
+  if (!user) {
+    if (window.location.pathname === "/shop") return <ShoppingPage signedIn={false} />;
+    return <SignInPage />;
+  }
   if (window.location.pathname === "/shop") return <ShoppingPage />;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">

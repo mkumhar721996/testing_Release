@@ -42,3 +42,18 @@ export async function getSession(): Promise<SessionUser | null> {
   const data = await res.json();
   return { email: data.user.email, role: data.user.role };
 }
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  await post("/auth/password-reset/request", { email });
+}
+
+export async function resetPassword(token: string, password: string): Promise<ActivateResult> {
+  const res = await post("/auth/password-reset/confirm", { token, password });
+  if (res.ok) return { ok: true };
+  const data = await res.json().catch(() => ({}));
+  return {
+    ok: false,
+    code: data.code ?? "password_reset_failed",
+    message: data.message ?? "Password reset failed.",
+  };
+}

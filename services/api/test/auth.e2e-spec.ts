@@ -5,11 +5,15 @@ import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app/app.module';
 import { ActivationService } from '../src/auth/activation.service';
-import { InvalidCredentialsError } from '../src/auth/auth.errors';
+import {
+  InvalidCredentialsError,
+  PasswordPolicyError,
+} from '../src/auth/auth.errors';
+import { PASSWORD_RESET_NOTIFIER } from '../src/auth/password-reset.notifier';
 import { Clock } from '../src/auth/clock';
 import { COGNITO_AUTH } from '../src/auth/cognito-auth.port';
 import { User } from '../src/auth/entities/user.entity';
-import { FakeClock, fakeCognito } from '../src/auth/testing/fakes';
+import { FakeClock, fakeCognito, fakeNotifier } from '../src/auth/testing/fakes';
 
 const GENERIC = { message: 'Incorrect email or password.' };
 const t0 = new Date('2026-01-01T00:00:00Z');
@@ -23,6 +27,7 @@ describe('Auth (e2e)', () => {
   let cognito: ReturnType<typeof fakeCognito>;
   let ds: DataSource;
   let activation: ActivationService;
+  let notifier: ReturnType<typeof fakeNotifier>;
   let n = 0;
 
   const makeUser = (status: 'active' | 'pending' = 'active') =>
@@ -37,9 +42,12 @@ describe('Auth (e2e)', () => {
   beforeAll(async () => {
     clock = new FakeClock(t0);
     cognito = fakeCognito();
+    notifier = fakeNotifier();
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(COGNITO_AUTH)
       .useValue(cognito)
+      .overrideProvider(PASSWORD_RESET_NOTIFIER)
+      .useValue(notifier)
       .overrideProvider(Clock)
       .useValue(clock)
       .compile();
@@ -103,6 +111,20 @@ describe('Auth (e2e)', () => {
     expect(res.headers['set-cookie']).toBeUndefined();
   });
 
+  it('refuses an unregistered username without a cookie', async () => {
+    const res = await signIn('nobody@example.com', 'anything').expect(401);
+    expect(res.headers['set-cookie']).toBeUndefined();
+    expect(res.body).toEqual(GENERIC);
+  });
+
+  it('refuses an empty password without a cookie or a Cognito call', async () => {
+    const user = await makeUser();
+    const res = await signIn(user.email, '').expect(401);
+    expect(res.headers['set-cookie']).toBeUndefined();
+    expect(res.body).toEqual(GENERIC);
+    expect(cognito.signIn).not.toHaveBeenCalled();
+  });
+
   it('gives an identical refusal for every failure reason (AC7)', async () => {
     const wrongUser = await makeUser();
     const pending = await makeUser('pending');
@@ -131,6 +153,64 @@ describe('Auth (e2e)', () => {
       .post('/auth/activate')
       .send({ token, password: PASSWORD })
       .expect(400);
+  });
+
+  it('resets a forgotten password and signs in with the new one', async () => {
+    const user = await makeUser();
+    await request(app.getHttpServer())
+      .post('/auth/password-reset/request')
+      .send({ email: user.email })
+      .expect(202);
+    const token = notifier.lastToken();
+    await request(app.getHttpServer())
+      .post('/auth/password-reset/confirm')
+      .send({ token, password: 'new-password' })
+      .expect(200, { status: 'password_reset' });
+    cognito.signIn.mockImplementation(async (_e, p) => {
+      if (p !== 'new-password') throw new InvalidCredentialsError();
+      return { refreshToken: 'r', sub: 'sub' };
+    });
+    await signIn(user.email, 'new-password').expect(200);
+    await signIn(user.email, 'old-password').expect(401);
+  });
+
+  it('answers a reset request identically for known and unknown emails', async () => {
+    const user = await makeUser();
+    const known = await request(app.getHttpServer())
+      .post('/auth/password-reset/request')
+      .send({ email: user.email })
+      .expect(202);
+    const unknown = await request(app.getHttpServer())
+      .post('/auth/password-reset/request')
+      .send({ email: 'nobody@example.com' })
+      .expect(202);
+    await request(app.getHttpServer())
+      .post('/auth/password-reset/request')
+      .send({})
+      .expect(202);
+    expect(known.body).toEqual(unknown.body);
+  });
+
+  it('refuses an expired reset link and a weak password', async () => {
+    const user = await makeUser();
+    await request(app.getHttpServer())
+      .post('/auth/password-reset/request')
+      .send({ email: user.email });
+    const token = notifier.lastToken();
+    cognito.setPermanentPassword.mockRejectedValueOnce(
+      new PasswordPolicyError(),
+    );
+    const weak = await request(app.getHttpServer())
+      .post('/auth/password-reset/confirm')
+      .send({ token, password: 'weak' })
+      .expect(400);
+    expect(weak.body.code).toBe('password_policy');
+    clock.advance(60 * 60_000 + 1);
+    const res = await request(app.getHttpServer())
+      .post('/auth/password-reset/confirm')
+      .send({ token, password: PASSWORD })
+      .expect(410);
+    expect(res.body.code).toBe('password_reset_link_expired');
   });
 
   it('refuses an expired link and asks for a new email (AC9, AC10)', async () => {

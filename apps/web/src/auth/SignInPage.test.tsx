@@ -15,6 +15,20 @@ describe("SignInPage", () => {
     expect(screen.getByLabelText(/password/i)).toHaveAttribute("type", "password");
   });
 
+  it("shows a username input on load (AC1)", () => {
+    render(<SignInPage />);
+    const field = screen.getByRole("textbox");
+    expect(field).toBeVisible();
+    expect(field).toHaveAttribute("autocomplete", "username");
+  });
+
+  it("shows a password input on load (AC2)", () => {
+    render(<SignInPage />);
+    const field = screen.getByLabelText(/password/i);
+    expect(field).toBeVisible();
+    expect(field).toHaveAttribute("type", "password");
+  });
+
   it("links to the forgot-password page", () => {
     render(<SignInPage />);
     expect(screen.getByRole("link", { name: /forgot password\?/i })).toHaveAttribute(

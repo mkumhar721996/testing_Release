@@ -41,4 +41,28 @@ describe("AuthProvider", () => {
     await user.click(screen.getByRole("button", { name: "sign out" }));
     expect(await screen.findByText("out")).toBeInTheDocument();
   });
+
+  it("clears the user even when the sign-out request fails (E7)", async () => {
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
+    vi.mocked(client.signOut).mockRejectedValue(new Error("network"));
+    const user = userEvent.setup();
+    function SwallowingProbe() {
+      const { user: u, loading, signOut } = useAuth();
+      if (loading) return <p>loading</p>;
+      return (
+        <>
+          <p>{u ? `in:${u.email}` : "out"}</p>
+          <button onClick={() => signOut().catch(() => {})}>sign out</button>
+        </>
+      );
+    }
+    render(
+      <AuthProvider>
+        <SwallowingProbe />
+      </AuthProvider>,
+    );
+    await screen.findByText("in:ada@example.com");
+    await user.click(screen.getByRole("button", { name: "sign out" }));
+    expect(await screen.findByText("out")).toBeInTheDocument();
+  });
 });

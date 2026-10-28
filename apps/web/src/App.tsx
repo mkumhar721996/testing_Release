@@ -3,6 +3,7 @@ import { ActivatePage } from "./auth/ActivatePage";
 import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "./auth/ResetPasswordPage";
 import { SignInPage } from "./auth/SignInPage";
+import { Navigation } from "./nav/Navigation";
 import { ShoppingPage } from "./shop/ShoppingPage";
 
 function Shell() {
@@ -13,6 +14,7 @@ function Shell() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
       <h1 className="text-2xl font-semibold text-slate-900">Web App</h1>
+      <Navigation role={user.role} />
       <p className="text-slate-700">Signed in as {user.email}</p>
       <a href="/shop" className="text-slate-900 underline">
         Shop

@@ -29,7 +29,7 @@ describe("AuthProvider", () => {
   });
 
   it("clears the user on sign-out (AC4)", async () => {
-    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
     vi.mocked(client.signOut).mockResolvedValue();
     const user = userEvent.setup();
     render(

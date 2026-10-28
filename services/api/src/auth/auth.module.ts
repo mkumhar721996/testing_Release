@@ -38,6 +38,6 @@ import { SessionService } from './session.service';
     { provide: Clock, useClass: SystemClock },
     { provide: COGNITO_AUTH, useClass: AwsCognitoAuth },
   ],
-  exports: [SessionGuard, SessionService, ActivationService],
+  exports: [SessionGuard, SessionService, ActivationService, TypeOrmModule],
 })
 export class AuthModule {}

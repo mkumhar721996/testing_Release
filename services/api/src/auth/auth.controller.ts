@@ -33,6 +33,7 @@ import {
   SignInRefusedError,
 } from './auth.errors';
 import { AuthService } from './auth.service';
+import { Role } from './role';
 import { PasswordResetService } from './password-reset.service';
 import { SessionGuard } from './session.guard';
 
@@ -144,7 +145,10 @@ export class AuthController {
 
   @Get('session')
   @UseGuards(SessionGuard)
-  session(@Req() req: Request & { user?: { id: string; email: string } }) {
+  session(
+    @Req()
+    req: Request & { user?: { id: string; email: string; role: Role } },
+  ) {
     return { user: req.user };
   }
 

@@ -1,5 +1,8 @@
 const base = () => import.meta.env.VITE_API_BASE_URL ?? "";
 
+export type Role = "employee" | "manager" | "hr_admin" | "read_only_executive";
+export type SessionUser = { email: string; role: Role };
+
 export type SignInResult = { ok: true } | { ok: false; message: string };
 export type ActivateResult = { ok: true } | { ok: false; code: string; message: string };
 
@@ -33,11 +36,11 @@ export async function activate(token: string, password: string): Promise<Activat
   };
 }
 
-export async function getSession(): Promise<{ email: string } | null> {
+export async function getSession(): Promise<SessionUser | null> {
   const res = await fetch(`${base()}/auth/session`, { credentials: "include" });
   if (!res.ok) return null;
   const data = await res.json();
-  return { email: data.user.email };
+  return { email: data.user.email, role: data.user.role };
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {

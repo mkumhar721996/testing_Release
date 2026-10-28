@@ -38,14 +38,14 @@ describe("App", () => {
   });
 
   it("shows who is signed in", async () => {
-    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
     render(<App />);
     expect(await screen.findByText("Signed in as ada@example.com")).toBeInTheDocument();
   });
 
   it("renders the shopping page at /shop when signed in", async () => {
     vi.mocked(shopClient.listProducts).mockResolvedValue([]);
-    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com" });
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
     window.history.pushState({}, "", "/shop");
     render(<App />);
     expect(await screen.findByRole("heading", { name: /shop/i })).toBeInTheDocument();

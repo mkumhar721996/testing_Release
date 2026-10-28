@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import {
+  ACTIVATION_NOTIFIER,
+  LoggingActivationNotifier,
+} from './activation.notifier';
 import { ActivationService } from './activation.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -33,11 +37,19 @@ import { SessionService } from './session.service';
     ActivationService,
     PasswordResetService,
     { provide: PASSWORD_RESET_NOTIFIER, useClass: LoggingPasswordResetNotifier },
+    { provide: ACTIVATION_NOTIFIER, useClass: LoggingActivationNotifier },
     SessionService,
     SessionGuard,
     { provide: Clock, useClass: SystemClock },
     { provide: COGNITO_AUTH, useClass: AwsCognitoAuth },
   ],
-  exports: [SessionGuard, SessionService, ActivationService, TypeOrmModule],
+  exports: [
+    SessionGuard,
+    SessionService,
+    ActivationService,
+    ACTIVATION_NOTIFIER,
+    COGNITO_AUTH,
+    TypeOrmModule,
+  ],
 })
 export class AuthModule {}

@@ -7,6 +7,9 @@ export interface CognitoAuthPort {
   signOut(refreshToken: string): Promise<void>;
   setPermanentPassword(email: string, password: string): Promise<void>;
   enableUser(email: string): Promise<void>;
+  /** Creates the user without sending Cognito's own message; the platform delivers the activation link. */
+  createUser(email: string): Promise<{ sub: string }>;
+  disableUser(email: string): Promise<void>;
 }
 
 export const COGNITO_AUTH = Symbol('COGNITO_AUTH');

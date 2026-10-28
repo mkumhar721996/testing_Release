@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AdminCreateUserCommand,
+  AdminDisableUserCommand,
   AdminEnableUserCommand,
   AdminGetUserCommand,
   AdminSetUserPasswordCommand,
@@ -89,6 +91,31 @@ export class AwsCognitoAuth implements CognitoAuthPort {
       }
       throw err;
     }
+  }
+
+  async createUser(email: string): Promise<{ sub: string }> {
+    const res = await this.client.send(
+      new AdminCreateUserCommand({
+        UserPoolId: this.poolId,
+        Username: email,
+        MessageAction: 'SUPPRESS',
+        UserAttributes: [
+          { Name: 'email', Value: email },
+          { Name: 'email_verified', Value: 'true' },
+        ],
+      }),
+    );
+    const sub = res.User?.Attributes?.find((a) => a.Name === 'sub')?.Value;
+    if (!sub) throw new Error('Cognito did not return a user id');
+    // Stays unusable until activation calls enableUser.
+    await this.disableUser(email);
+    return { sub };
+  }
+
+  async disableUser(email: string): Promise<void> {
+    await this.client.send(
+      new AdminDisableUserCommand({ UserPoolId: this.poolId, Username: email }),
+    );
   }
 
   async enableUser(email: string): Promise<void> {

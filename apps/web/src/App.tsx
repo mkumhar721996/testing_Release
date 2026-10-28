@@ -1,3 +1,5 @@
+import { AccessRestricted } from "./admin/AccessRestricted";
+import { UsersAdminPage } from "./admin/UsersAdminPage";
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import { ActivatePage } from "./auth/ActivatePage";
 import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
@@ -11,6 +13,9 @@ function Shell() {
   if (loading) return null;
   if (!user) return <SignInPage />;
   if (window.location.pathname === "/shop") return <ShoppingPage />;
+  if (window.location.pathname === "/admin/users") {
+    return user.role === "hr_admin" ? <UsersAdminPage /> : <AccessRestricted />;
+  }
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
       <h1 className="text-2xl font-semibold text-slate-900">Web App</h1>
@@ -19,6 +24,11 @@ function Shell() {
       <a href="/shop" className="text-slate-900 underline">
         Shop
       </a>
+      {user.role === "hr_admin" && (
+        <a href="/admin/users" className="text-slate-900 underline">
+          Users
+        </a>
+      )}
       <button onClick={signOut} className="rounded bg-slate-900 px-4 py-2 text-white">
         Sign out
       </button>

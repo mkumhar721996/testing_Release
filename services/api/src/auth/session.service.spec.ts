@@ -52,6 +52,17 @@ describe('SessionService', () => {
     expect(await sessions.touchIfActive(s.id)).toBeNull();
   });
 
+  it('ends every live session of one user and returns them (AC9)', async () => {
+    const a = await sessions.create('user-1', 'ra');
+    const b = await sessions.create('user-1', 'rb');
+    const other = await sessions.create('user-2', 'rc');
+    await sessions.end(b.id);
+    const ended = await sessions.endAllForUser('user-1');
+    expect(ended.map((s) => s.cognitoRefreshToken)).toEqual(['ra']);
+    expect(await sessions.touchIfActive(a.id)).toBeNull();
+    expect(await sessions.touchIfActive(other.id)).not.toBeNull();
+  });
+
   it('returns null for an ended or unknown session', async () => {
     const s = await sessions.create('user-1', 'r');
     await sessions.end(s.id);

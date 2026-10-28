@@ -63,6 +63,15 @@ describe('AuthService', () => {
     } as User);
   });
 
+  it('refuses a deactivated account without consulting Cognito (AC10)', async () => {
+    succeed();
+    await users.save({ ...(await stored()), status: 'deactivated' });
+    await expect(auth.signIn(user.email, 'test-password')).rejects.toBeInstanceOf(
+      SignInRefusedError,
+    );
+    expect(cognito.signIn).not.toHaveBeenCalled();
+  });
+
   it('signs in with valid credentials (AC3, AC8)', async () => {
     succeed();
     const res = await auth.signIn('Ada@Example.com', 'test-password');

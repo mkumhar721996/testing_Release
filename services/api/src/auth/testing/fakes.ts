@@ -42,6 +42,25 @@ export class FakeRepo<T extends { id?: string }> {
     return row;
   }
 
+  async find(opts?: { where?: Partial<T> }): Promise<T[]> {
+    return this.stored
+      .filter((r) =>
+        Object.entries(opts?.where ?? {}).every(([k, v]) => {
+          const actual = (r as never)[k];
+          return (v as { _type?: string } | null)?._type === 'isNull'
+            ? actual === null
+            : actual === v;
+        }),
+      )
+      .map((r) => structuredClone(r));
+  }
+
+  async delete(where: Partial<T>): Promise<void> {
+    this.stored = this.stored.filter(
+      (r) => !Object.entries(where).every(([k, v]) => (r as never)[k] === v),
+    );
+  }
+
   async save(entity: T): Promise<T> {
     entity.id ??= randomUUID();
     const copy = structuredClone(entity);
@@ -118,6 +137,8 @@ export function fakeCognito(): jest.Mocked<CognitoAuthPort> {
     signOut: jest.fn().mockResolvedValue(undefined),
     setPermanentPassword: jest.fn().mockResolvedValue(undefined),
     enableUser: jest.fn().mockResolvedValue(undefined),
+    createUser: jest.fn(),
+    disableUser: jest.fn().mockResolvedValue(undefined),
   };
 }
 

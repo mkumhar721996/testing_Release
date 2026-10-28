@@ -24,7 +24,7 @@ export class SessionGuard implements CanActivate {
     const user = session
       ? await this.users.findOneBy({ id: session.userId })
       : null;
-    if (!user) {
+    if (!user || user.status !== 'active') {
       throw new UnauthorizedException({ code: 'session_expired' });
     }
     req.user = { id: user.id, email: user.email, role: user.role };

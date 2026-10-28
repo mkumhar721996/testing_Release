@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { INACTIVITY_TIMEOUT_MS } from './auth.constants';
 import { Clock } from './clock';
 import { Session } from './entities/session.entity';
@@ -52,6 +52,20 @@ export class SessionService {
     if (!session || session.endedAt) return null;
     session.endedAt = this.clock.now();
     return this.present(await this.sessions.save(session), sessionId);
+  }
+
+  /** Ends every live session of the user and returns them, so the caller can revoke their tokens. */
+  async endAllForUser(userId: string): Promise<Session[]> {
+    const live = await this.sessions.find({
+      where: { userId, endedAt: IsNull() },
+    });
+    const now = this.clock.now();
+    const ended: Session[] = [];
+    for (const session of live) {
+      session.endedAt = now;
+      ended.push(this.present(await this.sessions.save(session), session.id));
+    }
+    return ended;
   }
 
   private present(session: Session, rawId: string): Session {

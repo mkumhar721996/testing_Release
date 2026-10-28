@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Role } from '../role';
 
-export type UserStatus = 'pending' | 'active';
+export type UserStatus = 'pending' | 'active' | 'deactivated';
 
 @Entity('users')
 export class User {

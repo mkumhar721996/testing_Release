@@ -7,7 +7,10 @@ import * as client from "./auth/authClient";
 import * as shopClient from "./shop/shopClient";
 
 vi.mock("./auth/authClient");
+import * as adminClient from "./admin/adminUsersClient";
+
 vi.mock("./shop/shopClient");
+vi.mock("./admin/adminUsersClient");
 
 afterEach(() => vi.resetAllMocks());
 
@@ -59,5 +62,27 @@ describe("App", () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "hr@example.com", role: "hr_admin" });
     render(<App />);
     expect(await screen.findByText("Admin")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Users" })).toHaveAttribute("href", "/admin/users");
   });
+
+  it("renders the user list at /admin/users for an HR admin", async () => {
+    vi.mocked(adminClient.listUsers).mockResolvedValue([]);
+    vi.mocked(client.getSession).mockResolvedValue({ email: "hr@example.com", role: "hr_admin" });
+    window.history.pushState({}, "", "/admin/users");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Users" })).toBeInTheDocument();
+    expect(adminClient.listUsers).toHaveBeenCalled();
+  });
+
+  it.each(["employee", "manager", "read_only_executive"] as const)(
+    "shows %s the restricted card and never calls the API (AC8)",
+    async (role) => {
+      vi.mocked(client.getSession).mockResolvedValue({ email: "x@example.com", role });
+      window.history.pushState({}, "", "/admin/users");
+      render(<App />);
+      expect(await screen.findByText("This page is available to HR admins only.")).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "Users" })).toBeNull();
+      expect(adminClient.listUsers).not.toHaveBeenCalled();
+    },
+  );
 });

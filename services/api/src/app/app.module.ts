@@ -9,6 +9,7 @@ import { DashboardsModule } from '../dashboards/dashboards.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { LeaveModule } from '../leave/leave.module';
 import { ShopModule } from '../shop/shop.module';
+import { UsersAdminModule } from '../users-admin/users-admin.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ShopModule } from '../shop/shop.module';
     LeaveModule,
     DashboardsModule,
     ShopModule,
+    UsersAdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

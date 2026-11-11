@@ -23,6 +23,11 @@ describe("SignInPage", () => {
     );
   });
 
+  it("links to the registration page", () => {
+    render(<SignInPage />);
+    expect(screen.getByRole("link", { name: /register/i })).toHaveAttribute("href", "/register");
+  });
+
   it("does not submit when the password is empty", async () => {
     signIn.mockReset();
     const user = userEvent.setup();

@@ -22,6 +22,12 @@ export class PasswordPolicyError extends Error {
   }
 }
 
+export class EmailAlreadyRegisteredError extends Error {
+  constructor() {
+    super('Email already registered');
+  }
+}
+
 export class ActivationLinkInvalidError extends Error {
   constructor() {
     super('Activation link invalid');

@@ -1,6 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { AwsCognitoAuth } from './aws-cognito-auth';
-import { InvalidCredentialsError, PasswordPolicyError } from './auth.errors';
+import {
+  EmailAlreadyRegisteredError,
+  InvalidCredentialsError,
+  PasswordPolicyError,
+} from './auth.errors';
 
 describe('AwsCognitoAuth', () => {
   const build = (response: unknown) => {
@@ -49,5 +53,54 @@ describe('AwsCognitoAuth', () => {
     await expect(
       failing('InvalidPasswordException').setPermanentPassword('a@b.c', 'weak'),
     ).rejects.toBeInstanceOf(PasswordPolicyError);
+  });
+
+  it('maps UsernameExistsException on registration to EmailAlreadyRegisteredError', async () => {
+    await expect(
+      failing('UsernameExistsException').createUser('a@example.com', 'pw'),
+    ).rejects.toBeInstanceOf(EmailAlreadyRegisteredError);
+  });
+
+  it('maps InvalidPasswordException on registration to PasswordPolicyError and removes the user', async () => {
+    const auth = new AwsCognitoAuth(new ConfigService({}));
+    const send = jest
+      .fn()
+      .mockResolvedValueOnce({
+        User: { Attributes: [{ Name: 'sub', Value: 'sub-1' }] },
+      })
+      .mockRejectedValueOnce(
+        Object.assign(new Error('x'), { name: 'InvalidPasswordException' }),
+      )
+      .mockResolvedValueOnce({});
+    (auth as unknown as { client: unknown }).client = { send };
+    await expect(auth.createUser('a@example.com', 'pw')).rejects.toBeInstanceOf(
+      PasswordPolicyError,
+    );
+    expect(send).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not mark the unproven email as verified', async () => {
+    const auth = new AwsCognitoAuth(new ConfigService({}));
+    const send = jest.fn().mockResolvedValue({ User: { Username: 'u' } });
+    (auth as unknown as { client: unknown }).client = { send };
+    await auth.createUser('a@example.com', 'pw');
+    expect(send.mock.calls[0][0].input.UserAttributes).toContainEqual({
+      Name: 'email_verified',
+      Value: 'false',
+    });
+  });
+
+  it('returns the sub of the created user', async () => {
+    const auth = new AwsCognitoAuth(new ConfigService({}));
+    const send = jest
+      .fn()
+      .mockResolvedValueOnce({
+        User: { Attributes: [{ Name: 'sub', Value: 'sub-1' }] },
+      })
+      .mockResolvedValueOnce({});
+    (auth as unknown as { client: unknown }).client = { send };
+    await expect(auth.createUser('a@example.com', 'pw')).resolves.toEqual({
+      sub: 'sub-1',
+    });
   });
 });

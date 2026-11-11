@@ -1,6 +1,7 @@
 import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import { ActivatePage } from "./auth/ActivatePage";
 import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
+import { RegisterPage } from "./auth/RegisterPage";
 import { ResetPasswordPage } from "./auth/ResetPasswordPage";
 import { SignInPage } from "./auth/SignInPage";
 import { Navigation } from "./nav/Navigation";
@@ -36,6 +37,7 @@ function App() {
     return <ResetPasswordPage token={token} />;
   }
   if (window.location.pathname === "/forgot-password") return <ForgotPasswordPage />;
+  if (window.location.pathname === "/register") return <RegisterPage />;
   return (
     <AuthProvider>
       <Shell />

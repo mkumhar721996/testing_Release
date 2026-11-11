@@ -14,6 +14,14 @@ afterEach(() => vi.resetAllMocks());
 describe("App", () => {
   afterEach(() => window.history.pushState({}, "", "/"));
 
+  it("shows the registration form at /register", () => {
+    window.history.pushState({}, "", "/register");
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Register" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toHaveAttribute("type", "password");
+  });
+
   it("renders the forgot-password page at /forgot-password", () => {
     window.history.pushState({}, "", "/forgot-password");
     render(<App />);

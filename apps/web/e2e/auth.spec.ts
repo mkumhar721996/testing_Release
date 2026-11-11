@@ -2,6 +2,14 @@ import { test, expect } from "@playwright/test";
 
 const GENERIC = "Incorrect email or password.";
 
+test("the login option is shown when the page finishes loading", async ({ page }) => {
+  await page.route("**/auth/session", (r) =>
+    r.fulfill({ status: 401, json: { code: "session_expired" } }),
+  );
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+});
+
 test("a refused sign-in shows only the generic message", async ({ page }) => {
   await page.route("**/auth/session", (r) =>
     r.fulfill({ status: 401, json: { code: "session_expired" } }),

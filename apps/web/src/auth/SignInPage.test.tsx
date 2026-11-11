@@ -32,6 +32,18 @@ describe("SignInPage", () => {
     expect(signIn).not.toHaveBeenCalled();
   });
 
+  it("submits valid credentials and shows no alert", async () => {
+    signIn.mockReset();
+    signIn.mockResolvedValue({ ok: true });
+    const user = userEvent.setup();
+    render(<SignInPage />);
+    await user.type(screen.getByLabelText(/email/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/password/i), "test-password");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+    expect(signIn).toHaveBeenCalledWith("ada@example.com", "test-password");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("keeps the sign-in form on screen after a refused sign-in", async () => {
     signIn.mockResolvedValue({ ok: false, message: GENERIC });
     const user = userEvent.setup();

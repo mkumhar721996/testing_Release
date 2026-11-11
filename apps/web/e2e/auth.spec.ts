@@ -14,6 +14,23 @@ test("a refused sign-in shows only the generic message", async ({ page }) => {
   await page.getByLabel("Password").fill("test-password");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("alert")).toHaveText(GENERIC);
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByText(/Signed in as/)).toHaveCount(0);
+});
+
+test("an unknown account is refused with the same generic message", async ({ page }) => {
+  await page.route("**/auth/session", (r) =>
+    r.fulfill({ status: 401, json: { code: "session_expired" } }),
+  );
+  await page.route("**/auth/sign-in", (r) =>
+    r.fulfill({ status: 401, json: { message: GENERIC } }),
+  );
+  await page.goto("/");
+  await page.getByLabel("Email").fill("nobody@example.com");
+  await page.getByLabel("Password").fill("test-password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.getByRole("alert")).toHaveText(GENERIC);
+  await expect(page.getByText(/Signed in as/)).toHaveCount(0);
 });
 
 test("a successful sign-in shows the user as signed in", async ({ page }) => {

@@ -4,23 +4,56 @@ components:
     name: Web App
     kind: web_ui
     directory: apps/web
+    stack:
+      choices:
+        styling: Tailwind CSS
+        language: JavaScript/TypeScript
+        framework: React
+        package_manager: pnpm
+        testing_tool_e2e: Playwright
+        testing_tool_unit: vitest
   comp_api_service:
     name: API Service
     kind: api_service
     directory: services/api
+    stack:
+      choices:
+        database: PostgreSQL
+        language: JavaScript/TypeScript
+        framework: NestJS
+        package_manager: pnpm
+        testing_tool_unit: jest
+      notes: styling not applicable — API only; PostgreSQL via TypeORM (pg driver)
   comp_worker:
     name: Worker
     kind: worker
     directory: services/worker
+    stack:
+      choices:
+        language: JavaScript/TypeScript
+        package_manager: pnpm
+        testing_tool_unit: jest
   comp_relational_database:
     name: Relational Database
     kind: infrastructure
+    stack:
+      choices:
+        managed_service: PostgreSQL on Amazon RDS
   comp_object_storage:
     name: Object Storage
     kind: infrastructure
+    stack:
+      choices:
+        managed_service: Amazon S3
   comp_job_queue:
     name: Job Queue
     kind: infrastructure
+    stack:
+      choices:
+        managed_service: Amazon SQS
   comp_identity_provider:
     name: Identity Provider
     kind: managed_service
+    stack:
+      choices:
+        managed_service: AWS Cognito (OIDC/SAML)

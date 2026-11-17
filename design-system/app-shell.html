@@ -115,6 +115,21 @@
       .shell-menu-btn {
         display: inline-flex;
       }
+
+      .shell-nav-link {
+        padding-block: var(--space-4);
+      }
+
+      .shell-topbar .btn-icon,
+      .shell-topbar .input {
+        min-width: calc(var(--space-6) + var(--space-3));
+        min-height: calc(var(--space-6) + var(--space-3));
+      }
+
+      .shell-topbar .input {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
     }
   </style>
 </head>
@@ -122,7 +137,7 @@
   <div data-arc-shell class="shell">
     <aside id="primary-nav" class="shell-sidebar">
       <div class="shell-brand">Comp Console</div>
-      <nav class="shell-nav">
+      <nav class="shell-nav" data-arc-shell-part="nav">
         <a class="shell-nav-link" data-nav-key="dashboard" href="#">Dashboard</a>
         <a class="shell-nav-link" data-nav-key="records" href="#">Records</a>
         <a class="shell-nav-link" data-nav-key="tasks" href="#">Tasks</a>
@@ -133,7 +148,7 @@
     </aside>
 
     <div class="shell-main">
-      <header class="shell-topbar">
+      <header class="shell-topbar" data-arc-shell-part="header">
         <button type="button" class="btn btn-icon btn-ghost shell-menu-btn" data-toggle="primary-nav" aria-label="Toggle navigation">
           ☰
         </button>
@@ -148,7 +163,7 @@
         <div data-arc-content></div>
       </main>
 
-      <footer class="shell-footer">
+      <footer class="shell-footer" data-arc-shell-part="footer">
         Comp Console — internal use only.
       </footer>
     </div>

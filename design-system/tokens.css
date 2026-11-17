@@ -20,6 +20,11 @@
   --color-warning-subtle: #fef3c7; /** Warning badge/alert background. */
   --color-danger: #dc2626; /** Destructive actions and error states. */
   --color-danger-subtle: #fee4e4; /** Danger badge/alert background. */
+  --color-accent: #7c3aed; /** Secondary accent for non-status highlights: tags, charts, featured items. Not for primary actions. */
+  --color-accent-hover: #6d28d9; /** Hover/active state for accent-colored controls. */
+  --color-accent-subtle: #ede9fe; /** Low-emphasis accent fill: tag/chip background, highlighted rows. */
+  --color-info: #0e7490; /** Informational state: neutral notices, in-progress items. */
+  --color-info-subtle: #cffafe; /** Info badge/alert background. */
   --color-overlay: rgba(15, 23, 42, 0.5); /** Modal/drawer backdrop scrim. */
   --space-1: 4px; /** Tightest spacing: icon-to-label gaps, chip padding. */
   --space-2: 8px; /** Compact spacing: form control internal padding, stack gaps within a field. */

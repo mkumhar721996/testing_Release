@@ -3,8 +3,8 @@ id: ADR-0008
 category: nfr
 title: "NFR: data residency \u2014 all customer and application data remains within\
   \ the single selected AWS\u2026"
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0022
 dimension: data residency
 metric: location of stored customer and application data
 threshold: all customer and application data remains within the single selected AWS

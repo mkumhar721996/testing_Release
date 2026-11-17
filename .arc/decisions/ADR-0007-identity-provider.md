@@ -2,8 +2,8 @@
 id: ADR-0007
 category: component
 title: Identity Provider
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0021
 component_id: comp_identity_provider
 responsibility: Authentication and authorization via OIDC/SAML; AWS Cognito initially,
   with future support for Microsoft Entra ID, Okta, Keycloak, or any OIDC/SAML-compatible

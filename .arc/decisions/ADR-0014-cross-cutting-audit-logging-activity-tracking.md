@@ -2,8 +2,8 @@
 id: ADR-0014
 category: cross_cutting
 title: 'Cross-cutting: Audit logging & activity tracking'
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0028
 component_id: null
 decision: API Service records record changes and access events to an audit trail in
   the Relational Database

@@ -2,8 +2,8 @@
 id: ADR-0013
 category: cross_cutting
 title: 'Cross-cutting: Configurability & reusability across business domains'
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0027
 component_id: null
 decision: Entities, workflows, and settings are modeled as configurable metadata in
   the API/data layer rather than hard-coded per domain, so new business use cases

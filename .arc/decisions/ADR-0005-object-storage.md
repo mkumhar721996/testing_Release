@@ -2,8 +2,8 @@
 id: ADR-0005
 category: component
 title: Object Storage
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0019
 component_id: comp_object_storage
 responsibility: Stores uploaded documents and files referenced by business records;
   runs on Amazon S3

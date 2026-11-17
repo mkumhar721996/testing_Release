@@ -5,6 +5,7 @@ title: 'Integration: Chat Notification Webhooks (outbound)'
 status: accepted
 superseded_by: null
 component_id: comp_worker
+rule: Chat notifications go out only from the Worker as webhook calls.
 evidence: 'Human: ''Notifications: Microsoft Teams and Slack webhooks'''
 ---
 

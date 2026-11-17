@@ -2,8 +2,8 @@
 id: ADR-0006
 category: component
 title: Job Queue
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0020
 component_id: comp_job_queue
 responsibility: Queues asynchronous work (notification delivery, report generation,
   document processing) between API Service and Worker; runs on Amazon SQS

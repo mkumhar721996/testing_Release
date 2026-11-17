@@ -2,8 +2,8 @@
 id: ADR-0015
 category: cross_cutting
 title: 'Cross-cutting: API/webhook extensibility'
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0029
 component_id: null
 decision: API Service exposes an outbound webhook framework (event notifications)
   and inbound API endpoints so third-party business systems can integrate without

@@ -2,8 +2,8 @@
 id: ADR-0002
 category: component
 title: API Service
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0017
 component_id: comp_api_service
 responsibility: 'Core business logic: authentication/authorization, RBAC, business
   record CRUD, workflow/task management, search & filtering, reporting, audit logging,

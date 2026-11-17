@@ -2,8 +2,8 @@
 id: ADR-0003
 category: component
 title: Worker
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0018
 component_id: comp_worker
 responsibility: 'Background jobs: asynchronous notification/alert delivery, scheduled/heavy
   report generation, document processing'

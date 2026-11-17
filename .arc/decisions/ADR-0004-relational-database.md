@@ -9,12 +9,14 @@ responsibility: Primary store for business records, users, roles, master data, w
   state, audit logs; runs on PostgreSQL (Amazon RDS)
 kind: infrastructure
 split_reason: Backing data store the project runs, not built in-house
+rule: Relational business data lives only in the Relational Database, inside the selected
+  AWS region.
 evidence: 'Human: ''postgres''; deployment target is AWS'
 ---
 
 ## Context
 
-Human: 'postgres'; deployment target is AWS
+Human: 'postgres'; deployment target AWS
 
 ## Decision
 

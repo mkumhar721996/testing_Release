@@ -5,6 +5,7 @@ title: 'Integration: Amazon CloudWatch (outbound)'
 status: accepted
 superseded_by: null
 component_id: null
+rule: All components send structured logs and metrics to CloudWatch.
 evidence: 'Human: ''Monitoring & logging: Amazon CloudWatch'''
 ---
 

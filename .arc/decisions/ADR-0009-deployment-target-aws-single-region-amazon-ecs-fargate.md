@@ -3,8 +3,8 @@ id: ADR-0009
 category: deployment_target
 title: 'Deployment target: AWS, single region, Amazon ECS Fargate (managed containers)
   for compute'
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0026
 component_id: null
 decision: AWS, single region, Amazon ECS Fargate (managed containers) for compute
 evidence: 'Human: ''Hosting / Compute Model: Amazon ECS Fargate (managed containers);

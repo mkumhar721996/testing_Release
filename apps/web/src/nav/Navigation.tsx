@@ -10,14 +10,20 @@ const LABELS: Record<Section, string> = {
   admin: "Admin",
 };
 
+function href(section: Section, role: Role): string | undefined {
+  if (section === "employees") return "/employees";
+  if (section === "dashboards" && role === "manager") return "/dashboard";
+  return undefined;
+}
+
 export function Navigation({ role }: { role: Role }) {
   return (
     <nav aria-label="Main">
       <ul className="flex gap-4 text-slate-700">
         {navigationFor(role).map((section) => (
           <li key={section}>
-            {section === "employees" ? (
-              <a href="/employees" className="underline">
+            {href(section, role) ? (
+              <a href={href(section, role)} className="underline">
                 {LABELS[section]}
               </a>
             ) : (

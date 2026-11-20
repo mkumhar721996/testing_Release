@@ -1,5 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+export type LeaveStatus = 'pending' | 'approved' | 'rejected';
+
 @Entity('leave_entries')
 export class LeaveEntry {
   @PrimaryGeneratedColumn('uuid')
@@ -16,4 +18,8 @@ export class LeaveEntry {
 
   @Column()
   kind!: string;
+
+  /** Existing rows are recorded leave, so they default to approved. */
+  @Column({ type: 'varchar', default: 'approved' })
+  status!: LeaveStatus;
 }

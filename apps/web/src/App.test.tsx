@@ -6,6 +6,9 @@ import * as client from "./auth/authClient";
 
 import * as shopClient from "./shop/shopClient";
 
+import * as dashboardClient from "./dashboard/dashboardClient";
+
+vi.mock("./dashboard/dashboardClient");
 vi.mock("./auth/authClient");
 vi.mock("./shop/shopClient");
 
@@ -38,6 +41,22 @@ describe("App", () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
     render(<App />);
     expect(await screen.findByText("Signed in as ada@example.com")).toBeInTheDocument();
+  });
+
+  it("renders the manager dashboard at /dashboard for a manager", async () => {
+    vi.mocked(dashboardClient.getManagerDashboard).mockReturnValue(new Promise(() => {}));
+    vi.mocked(client.getSession).mockResolvedValue({ email: "m@example.com", role: "manager" });
+    window.history.pushState({}, "", "/dashboard");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Manager dashboard" })).toBeInTheDocument();
+  });
+
+  it("does not route other roles to /dashboard", async () => {
+    vi.mocked(client.getSession).mockResolvedValue({ email: "e@example.com", role: "employee" });
+    window.history.pushState({}, "", "/dashboard");
+    render(<App />);
+    expect(await screen.findByText("Signed in as e@example.com")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Manager dashboard" })).toBeNull();
   });
 
   it("renders the shopping page at /shop when signed in", async () => {

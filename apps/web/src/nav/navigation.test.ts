@@ -30,3 +30,13 @@ describe("navigationFor", () => {
     expect(navigationFor("hr_admin")).not.toContain("team");
   });
 });
+
+describe("expenses navigation", () => {
+  it.each<Role>(["employee", "manager", "hr_admin"])("lists Expenses for %s", (role) => {
+    expect(navigationFor(role)).toContain("expenses");
+  });
+
+  it("hides Expenses from the read-only executive", () => {
+    expect(navigationFor("read_only_executive")).not.toContain("expenses");
+  });
+});

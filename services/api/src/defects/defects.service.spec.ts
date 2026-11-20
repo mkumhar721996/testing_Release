@@ -46,6 +46,22 @@ describe('DefectsService.move', () => {
     );
   });
 
+  it('proposed AC21: the audit entry names the actor, both statuses and the reason', async () => {
+    const { service, manager } = setup('Closed');
+    await service.move('DEF-1', 'reopen', { reason: ' Seen again ' }, actor('qa'));
+    expect(manager.save).toHaveBeenCalledTimes(1);
+    expect(manager.save).toHaveBeenCalledWith(AuditEntry, {
+      actorUserId: 'u1',
+      entity: 'defect',
+      entityId: 'd1',
+      action: 'update',
+      changes: {
+        status: { from: 'Closed', to: 'In Progress' },
+        reason: 'Seen again',
+      },
+    });
+  });
+
   it('records the reason and original defect in the audit entry', async () => {
     const { service, manager } = setup('New');
     await service.move(

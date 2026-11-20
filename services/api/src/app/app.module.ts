@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccessModule } from '../access/access.module';
+import { AuditModule } from '../audit/audit.module';
 import { AuthModule } from '../auth/auth.module';
 import { DashboardsModule } from '../dashboards/dashboards.module';
 import { EmployeesModule } from '../employees/employees.module';
@@ -29,6 +30,7 @@ import { ShopModule } from '../shop/shop.module';
     }),
     AuthModule,
     AccessModule,
+    AuditModule,
     EmployeesModule,
     LeaveModule,
     DashboardsModule,

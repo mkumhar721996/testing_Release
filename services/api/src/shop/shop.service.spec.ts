@@ -40,9 +40,9 @@ describe('ShopService', () => {
 
   it('refuses a missing or unavailable product and saves no order', async () => {
     const gone = await addProduct('iPhone 1', false);
-    await expect(service.placeOrder('user-1', 'missing-id')).rejects.toBeInstanceOf(
-      ProductNotFoundError,
-    );
+    await expect(
+      service.placeOrder('user-1', 'missing-id'),
+    ).rejects.toBeInstanceOf(ProductNotFoundError);
     await expect(service.placeOrder('user-1', gone.id)).rejects.toBeInstanceOf(
       ProductNotFoundError,
     );

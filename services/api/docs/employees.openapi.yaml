@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: Employee records
+  version: 1.0.0
+paths:
+  /employees:
+    get:
+      summary: Search employees by name (HR admin only)
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Up to 50 matches, ordered by name
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Employee' } }
+        '403': { description: Not an HR admin }
+    post:
+      summary: Create an employee record (HR admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '400': { description: 'Invalid field; body {code}, e.g. manager_required, manager_not_found' }
+        '403': { description: Not an HR admin }
+        '409': { description: 'Contact email already used; body {code: contact_email_taken, employeeId}' }
+  /employees/options:
+    get:
+      summary: Departments and manager choices (HR admin only)
+      responses:
+        '200':
+          description: Form options
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  departments: { type: array, items: { type: string } }
+                  managers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        displayName: { type: string }
+                        isExecutive: { type: boolean }
+  /employees/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      summary: Read one employee record
+      responses:
+        '200':
+          description: The record
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '403': { description: Not permitted to read this record }
+    patch:
+      summary: Change any subset of the record fields (HR admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeInput' }
+      responses:
+        '200':
+          description: The updated record
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '400': { description: Invalid field; body {code} }
+        '403': { description: Not an HR admin }
+        '409': { description: 'Contact email already used' }
+components:
+  schemas:
+    EmployeeInput:
+      type: object
+      description: All fields are required on create; any subset is accepted on update.
+      properties:
+        displayName: { type: string }
+        jobTitle: { type: string }
+        department: { type: string }
+        managerId: { type: string, format: uuid, description: The employee's single manager }
+        payAnnual: { type: number, description: Annual pay in whole currency units }
+        contactEmail: { type: string, format: email }
+        phone: { type: string }
+    Employee:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string }
+        managerId: { type: string, format: uuid, nullable: true }
+        jobTitle: { type: string, nullable: true }
+        department: { type: string, nullable: true }
+        payAnnualMinor: { type: integer, nullable: true }
+        payCurrency: { type: string, nullable: true }
+        contactEmail: { type: string, nullable: true }
+        phone: { type: string, nullable: true }

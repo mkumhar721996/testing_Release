@@ -13,7 +13,11 @@ import { PASSWORD_RESET_NOTIFIER } from '../src/auth/password-reset.notifier';
 import { Clock } from '../src/auth/clock';
 import { COGNITO_AUTH } from '../src/auth/cognito-auth.port';
 import { User } from '../src/auth/entities/user.entity';
-import { FakeClock, fakeCognito, fakeNotifier } from '../src/auth/testing/fakes';
+import {
+  FakeClock,
+  fakeCognito,
+  fakeNotifier,
+} from '../src/auth/testing/fakes';
 
 const GENERIC = { message: 'Incorrect email or password.' };
 const t0 = new Date('2026-01-01T00:00:00Z');

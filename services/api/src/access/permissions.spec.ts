@@ -23,9 +23,9 @@ describe('can', () => {
   });
 
   it('lets a manager read a direct report (AC3)', () => {
-    expect(
-      can(actor('manager', 'm1'), 'record:read', target('e1', 'm1')),
-    ).toBe(true);
+    expect(can(actor('manager', 'm1'), 'record:read', target('e1', 'm1'))).toBe(
+      true,
+    );
   });
 
   it('refuses a manager a non-report and an indirect report (AC4)', () => {
@@ -95,6 +95,21 @@ describe('can', () => {
       'read_only_executive',
     ] as Role[]) {
       expect(can(actor(role), 'admin:view')).toBe(false);
+    }
+  });
+});
+
+describe('employee search and create', () => {
+  it('allows only HR admins to search and create (AC1, AC3)', () => {
+    expect(can(actor('hr_admin'), 'employees:search')).toBe(true);
+    expect(can(actor('hr_admin'), 'employees:create')).toBe(true);
+    for (const role of [
+      'employee',
+      'manager',
+      'read_only_executive',
+    ] as Role[]) {
+      expect(can(actor(role), 'employees:search')).toBe(false);
+      expect(can(actor(role), 'employees:create')).toBe(false);
     }
   });
 });

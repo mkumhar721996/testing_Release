@@ -98,3 +98,18 @@ describe('can', () => {
     }
   });
 });
+
+describe('leave administration', () => {
+  it('lets only an HR admin manage leave (AC5)', () => {
+    expect(can(actor('hr_admin'), 'leave:manage')).toBe(true);
+    expect(can(actor('hr_admin'), 'employees:list')).toBe(true);
+    for (const role of [
+      'employee',
+      'manager',
+      'read_only_executive',
+    ] as Role[]) {
+      expect(can(actor(role), 'leave:manage')).toBe(false);
+      expect(can(actor(role), 'employees:list')).toBe(false);
+    }
+  });
+});

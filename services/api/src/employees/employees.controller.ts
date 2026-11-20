@@ -20,6 +20,12 @@ import { EmployeesService } from './employees.service';
 export class EmployeesController {
   constructor(private readonly employees: EmployeesService) {}
 
+  @Get()
+  @RequirePermission('employees:list')
+  list() {
+    return this.employees.list();
+  }
+
   @Get('me')
   async me(@Req() req: { actor: Actor }) {
     if (!req.actor.employeeId) {

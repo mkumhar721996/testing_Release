@@ -3,6 +3,8 @@ import { ActivatePage } from "./auth/ActivatePage";
 import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "./auth/ResetPasswordPage";
 import { SignInPage } from "./auth/SignInPage";
+import { LeaveBalancesPage } from "./leave/LeaveBalancesPage";
+import { LeaveTypesPage } from "./leave/LeaveTypesPage";
 import { Navigation } from "./nav/Navigation";
 import { ShoppingPage } from "./shop/ShoppingPage";
 
@@ -11,6 +13,8 @@ function Shell() {
   if (loading) return null;
   if (!user) return <SignInPage />;
   if (window.location.pathname === "/shop") return <ShoppingPage />;
+  if (window.location.pathname === "/admin/leave-types") return <LeaveTypesPage />;
+  if (window.location.pathname === "/admin/leave-balances") return <LeaveBalancesPage />;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
       <h1 className="text-2xl font-semibold text-slate-900">Web App</h1>
@@ -19,6 +23,11 @@ function Shell() {
       <a href="/shop" className="text-slate-900 underline">
         Shop
       </a>
+      {user.role === "hr_admin" && (
+        <a href="/admin/leave-types" className="text-slate-900 underline">
+          Admin
+        </a>
+      )}
       <button onClick={signOut} className="rounded bg-slate-900 px-4 py-2 text-white">
         Sign out
       </button>

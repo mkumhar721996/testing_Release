@@ -10,6 +10,11 @@ export class EmployeesService {
     private readonly employees: Repository<Employee>,
   ) {}
 
+  async list(): Promise<Array<{ id: string; displayName: string }>> {
+    const rows = await this.employees.find({ order: { displayName: 'ASC' } });
+    return rows.map(({ id, displayName }) => ({ id, displayName }));
+  }
+
   findById(id: string): Promise<Employee | null> {
     return this.employees.findOneBy({ id });
   }

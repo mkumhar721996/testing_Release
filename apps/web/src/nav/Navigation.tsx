@@ -20,6 +20,10 @@ export function Navigation({ role }: { role: Role }) {
               <a href="/employees" className="underline">
                 {LABELS[section]}
               </a>
+            ) : section === "dashboards" && role === "read_only_executive" ? (
+              <a href="/dashboards/executive" className="underline">
+                {LABELS[section]}
+              </a>
             ) : (
               LABELS[section]
             )}

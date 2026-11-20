@@ -113,3 +113,14 @@ describe('employee search and create', () => {
     }
   });
 });
+
+describe('executive dashboard', () => {
+  it('allows dashboards:executive for the executive only (AC7)', () => {
+    expect(can(actor('read_only_executive'), 'dashboards:executive')).toBe(
+      true,
+    );
+    for (const role of ['employee', 'manager', 'hr_admin'] as Role[]) {
+      expect(can(actor(role), 'dashboards:executive')).toBe(false);
+    }
+  });
+});

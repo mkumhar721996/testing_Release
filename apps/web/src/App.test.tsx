@@ -6,6 +6,9 @@ import * as client from "./auth/authClient";
 
 import * as shopClient from "./shop/shopClient";
 
+import * as leaveClient from "./leave/leaveClient";
+
+vi.mock("./leave/leaveClient");
 vi.mock("./auth/authClient");
 vi.mock("./shop/shopClient");
 
@@ -59,5 +62,27 @@ describe("App", () => {
     vi.mocked(client.getSession).mockResolvedValue({ email: "hr@example.com", role: "hr_admin" });
     render(<App />);
     expect(await screen.findByText("Admin")).toBeInTheDocument();
+  });
+
+  it("links HR admins, and only them, to leave types from the home screen", async () => {
+    vi.mocked(client.getSession).mockResolvedValue({ email: "hr@example.com", role: "hr_admin" });
+    const { unmount } = render(<App />);
+    expect(await screen.findByRole("link", { name: "Leave types" })).toHaveAttribute(
+      "href",
+      "/admin/leave-types",
+    );
+    unmount();
+    vi.mocked(client.getSession).mockResolvedValue({ email: "ada@example.com", role: "employee" });
+    render(<App />);
+    await screen.findByText("Signed in as ada@example.com");
+    expect(screen.queryByRole("link", { name: "Leave types" })).toBeNull();
+  });
+
+  it("renders the leave types page at /admin/leave-types", async () => {
+    vi.mocked(leaveClient.listLeaveTypes).mockResolvedValue({ ok: true, value: [] });
+    vi.mocked(client.getSession).mockResolvedValue({ email: "hr@example.com", role: "hr_admin" });
+    window.history.pushState({}, "", "/admin/leave-types");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Leave types" })).toBeInTheDocument();
   });
 });

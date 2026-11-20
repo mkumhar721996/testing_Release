@@ -7,7 +7,10 @@ import { EmployeeCreatePage } from "./employees/EmployeeCreatePage";
 import { EmployeeRecordPage } from "./employees/EmployeeRecordPage";
 import { EmployeesPage } from "./employees/EmployeesPage";
 import { ExpensesPage } from "./expenses/ExpensesPage";
+import { LeaveBalancesPage } from "./leave/LeaveBalancesPage";
+import { LeaveTypesPage } from "./leave/LeaveTypesPage";
 import { Navigation } from "./nav/Navigation";
+import { navigationFor } from "./nav/navigation";
 import { ShoppingPage } from "./shop/ShoppingPage";
 
 function Shell() {
@@ -19,6 +22,8 @@ function Shell() {
   if (path === "/employees") return <EmployeesPage />;
   if (path === "/expenses") return <ExpensesPage />;
   if (path === "/employees/new") return <EmployeeCreatePage />;
+  if (path === "/admin/leave-types") return <LeaveTypesPage role={user.role} />;
+  if (path === "/admin/leave-balances") return <LeaveBalancesPage role={user.role} />;
   const recordId = path.match(/^\/employees\/([^/]+)$/)?.[1];
   if (recordId) return <EmployeeRecordPage id={recordId} role={user.role} />;
   return (
@@ -29,6 +34,11 @@ function Shell() {
       <a href="/shop" className="text-slate-900 underline">
         Shop
       </a>
+      {navigationFor(user.role).includes("admin") && (
+        <a href="/admin/leave-types" className="text-slate-900 underline">
+          Leave types
+        </a>
+      )}
       <button onClick={signOut} className="rounded bg-slate-900 px-4 py-2 text-white">
         Sign out
       </button>

@@ -21,7 +21,7 @@ export class AuditEntry {
   entityId!: string;
 
   @Column({ type: 'varchar' })
-  action!: 'create' | 'update';
+  action!: 'create' | 'update' | 'delete';
 
   @Column({ type: 'jsonb' })
   changes!: Record<string, unknown>;

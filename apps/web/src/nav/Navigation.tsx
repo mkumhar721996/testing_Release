@@ -11,14 +11,20 @@ const LABELS: Record<Section, string> = {
   admin: "Admin",
 };
 
+const LINKS: Partial<Record<Section, string>> = {
+  employees: "/employees",
+  team: "/direct-reports",
+  expenses: "/expenses",
+};
+
 export function Navigation({ role }: { role: Role }) {
   return (
     <nav aria-label="Main">
       <ul className="flex gap-4 text-slate-700">
         {navigationFor(role).map((section) => (
           <li key={section}>
-            {section === "employees" || section === "expenses" ? (
-              <a href={`/${section}`} className="underline">
+            {LINKS[section] ? (
+              <a href={LINKS[section]} className="underline">
                 {LABELS[section]}
               </a>
             ) : (

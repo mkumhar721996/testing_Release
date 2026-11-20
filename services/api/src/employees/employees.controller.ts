@@ -43,6 +43,12 @@ export class EmployeesController {
     return this.employees.options();
   }
 
+  @Get('direct-reports')
+  @RequirePermission('reports:read')
+  directReports(@Req() req: { actor: Actor }) {
+    return this.employees.directReports(req.actor.employeeId as string);
+  }
+
   @Post()
   @RequirePermission('employees:create')
   create(@Req() req: { actor: Actor }, @Body() body: Partial<EmployeeInput>) {

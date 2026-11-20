@@ -96,6 +96,39 @@ describe('Employee records (e2e)', () => {
     ).toContain('Priya Raman');
   });
 
+  it('lists a manager’s current direct reports only, work details only', async () => {
+    const boss = await makePerson('manager', null, 'Daniel Okafor');
+    await makePerson('employee', boss.employee.id, 'Tom Brennan');
+    const amara = await makePerson('employee', boss.employee.id, 'Amara Osei');
+    const leaver = await makePerson('employee', boss.employee.id, 'Left Lee');
+    await ds
+      .getRepository(Employee)
+      .update({ id: leaver.employee.id }, { leftAt: new Date() });
+    await makePerson('employee', amara.employee.id, 'Second Level');
+    const agent = await signedIn(boss.user.email);
+    const res = await agent.get('/employees/direct-reports').expect(200);
+    expect(
+      res.body.map((r: { displayName: string }) => r.displayName),
+    ).toEqual(['Amara Osei', 'Tom Brennan']);
+    expect(Object.keys(res.body[0]).sort()).toEqual([
+      'contactEmail',
+      'department',
+      'displayName',
+      'id',
+      'jobTitle',
+      'managerName',
+      'phone',
+    ]);
+    expect(res.body[0].managerName).toBe('Daniel Okafor');
+  });
+
+  it('returns an empty list for a manager with no reports', async () => {
+    const boss = await makePerson('manager');
+    const agent = await signedIn(boss.user.email);
+    const res = await agent.get('/employees/direct-reports').expect(200);
+    expect(res.body).toEqual([]);
+  });
+
   it('opens the full record for an HR admin (AC2)', async () => {
     const admin = await makePerson('hr_admin');
     const boss = await makePerson('manager');

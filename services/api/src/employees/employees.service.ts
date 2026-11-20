@@ -10,6 +10,7 @@ import { AuditEntry } from '../audit/audit-entry.entity';
 import { User } from '../auth/entities/user.entity';
 import { Employee } from './employee.entity';
 import {
+  DirectReport,
   EmployeeFields,
   EmployeeInput,
   ManagerOption,
@@ -39,6 +40,24 @@ export class EmployeesService {
       .orderBy('e."displayName"', 'ASC')
       .take(SEARCH_LIMIT)
       .getMany();
+  }
+
+  /** Employees whose manager is this one and who have not left; one level only. */
+  directReports(managerEmployeeId: string): Promise<DirectReport[]> {
+    return this.employees
+      .createQueryBuilder('e')
+      .innerJoin(Employee, 'm', 'm.id = e."managerId"')
+      .select('e.id', 'id')
+      .addSelect('e."displayName"', 'displayName')
+      .addSelect('e."jobTitle"', 'jobTitle')
+      .addSelect('e.department', 'department')
+      .addSelect('m."displayName"', 'managerName')
+      .addSelect('e."contactEmail"', 'contactEmail')
+      .addSelect('e.phone', 'phone')
+      .where('e."managerId" = :managerEmployeeId', { managerEmployeeId })
+      .andWhere('e."leftAt" IS NULL')
+      .orderBy('e."displayName"', 'ASC')
+      .getRawMany<DirectReport>();
   }
 
   async options(): Promise<{

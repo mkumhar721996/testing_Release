@@ -45,4 +45,8 @@ export class Employee {
 
   @Column({ type: 'varchar', nullable: true })
   phone!: string | null;
+
+  /** Set when HR marks the employee as having left; null while employed. */
+  @Column({ type: 'timestamptz', nullable: true })
+  leftAt!: Date | null;
 }

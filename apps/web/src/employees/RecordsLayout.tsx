@@ -8,11 +8,17 @@ const SECTIONS = [
   { id: "tasks", label: "Tasks" },
   { id: "reports", label: "Reports" },
   { id: "audit-log", label: "Audit Log" },
-  { id: "admin", label: "Admin" },
+  { id: "admin", label: "Admin", href: "/admin/leave-types" },
 ] as const;
 
 /** Prototype shell for the Records screens: sidebar plus slim top bar. */
-export function RecordsLayout({ children }: { children: ReactNode }) {
+export function RecordsLayout({
+  children,
+  active = "records",
+}: {
+  children: ReactNode;
+  active?: "records" | "admin";
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="app">
@@ -21,7 +27,12 @@ export function RecordsLayout({ children }: { children: ReactNode }) {
         <nav className="side-nav" aria-label="Main">
           {SECTIONS.map((section) =>
             "href" in section ? (
-              <a key={section.id} className="side-link" href={section.href} aria-current="page">
+              <a
+                key={section.id}
+                className="side-link"
+                href={section.href}
+                aria-current={section.id === active ? "page" : undefined}
+              >
                 {section.label}
               </a>
             ) : (

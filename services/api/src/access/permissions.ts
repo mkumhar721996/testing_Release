@@ -4,6 +4,7 @@ export type Action =
   | 'record:read'
   | 'record:write'
   | 'leave:read'
+  | 'leave:manage'
   | 'dashboards:read'
   | 'admin:view'
   | 'employees:search'
@@ -48,6 +49,7 @@ export function can(
       return actor.role !== 'employee';
     case 'expenses:write':
       return actor.employeeId !== null && actor.role !== 'read_only_executive';
+    case 'leave:manage':
     case 'employees:search':
     case 'employees:create':
     case 'admin:view':

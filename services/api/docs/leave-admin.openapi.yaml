@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: Leave types and balances
+  version: 1.0.0
+paths:
+  /leave-types:
+    get:
+      summary: List leave types with the number of employees who have a balance
+      responses:
+        '200':
+          description: Leave types ordered by name
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LeaveTypeRow' }
+    post:
+      summary: Create a leave type (HR admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeaveTypeInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LeaveType' }
+        '400': { description: 'Invalid name or exempt (leave_type_name_invalid, leave_type_exempt_invalid)' }
+        '403': { description: Not an HR admin }
+        '409': { description: 'Name already used, any case (leave_type_name_taken)' }
+  /leave-types/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    patch:
+      summary: Rename a leave type or change its exempt setting (HR admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LeaveTypeInput' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LeaveType' }
+        '400': { description: Invalid name or exempt }
+        '403': { description: Not an HR admin }
+        '404': { description: leave_type_not_found }
+        '409': { description: leave_type_name_taken }
+    delete:
+      summary: Delete a leave type nobody holds a balance for (HR admin only)
+      responses:
+        '204': { description: Deleted }
+        '403': { description: Not an HR admin }
+        '404': { description: leave_type_not_found }
+        '409': { description: 'A balance or leave entry references it (leave_type_in_use)' }
+  /employees/{id}/leave-balances:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      summary: One row per leave type; days is null when HR has not set it (HR admin only)
+      responses:
+        '200':
+          description: Balances ordered by leave type name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [leaveTypeId, name, exempt, days]
+                  properties:
+                    leaveTypeId: { type: string, format: uuid }
+                    name: { type: string }
+                    exempt: { type: boolean }
+                    days: { type: integer, minimum: 0, nullable: true }
+        '403': { description: Not an HR admin }
+        '404': { description: Unknown employee }
+  /employees/{id}/leave-balances/{leaveTypeId}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: leaveTypeId, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      summary: Set or adjust one balance; no other balance changes (HR admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [days]
+              properties:
+                days: { type: integer, minimum: 0 }
+      responses:
+        '200':
+          description: Stored balance
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [leaveTypeId, days]
+                properties:
+                  leaveTypeId: { type: string, format: uuid }
+                  days: { type: integer, minimum: 0 }
+        '400': { description: balance_invalid }
+        '403': { description: Not an HR admin }
+        '404': { description: Unknown employee or leave type }
+components:
+  schemas:
+    LeaveType:
+      type: object
+      required: [id, name, exempt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        exempt: { type: boolean }
+    LeaveTypeRow:
+      allOf:
+        - $ref: '#/components/schemas/LeaveType'
+        - type: object
+          required: [balanceCount]
+          properties:
+            balanceCount: { type: integer, minimum: 0 }
+    LeaveTypeInput:
+      type: object
+      properties:
+        name: { type: string }
+        exempt: { type: boolean }

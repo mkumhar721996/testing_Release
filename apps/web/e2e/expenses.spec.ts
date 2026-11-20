@@ -12,7 +12,8 @@ test("an employee records an expense with a receipt and saves it as a draft", as
     }),
   );
   await page.route("**/expenses", (r) => {
-    posted = r.request().method() === "POST";
+    if (r.request().method() !== "POST") return r.fallback();
+    posted = true;
     return r.fulfill({ status: 201, json: { id: "x1", status: "draft" } });
   });
 

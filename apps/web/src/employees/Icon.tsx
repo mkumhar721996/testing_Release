@@ -7,6 +7,7 @@ const PATHS = {
   edit: ["M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"],
   menu: ["M4 6h16", "M4 12h16", "M4 18h16"],
   back: ["M15 18l-6-6 6-6"],
+  image: ["M3 3h18v18H3z", "M8.5 8.5h.01", "M21 15l-5-5L5 21"],
 } as const;
 
 export type IconName = keyof typeof PATHS;

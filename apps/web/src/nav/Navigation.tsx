@@ -4,6 +4,7 @@ import { navigationFor, type Section } from "./navigation";
 const LABELS: Record<Section, string> = {
   profile: "Profile",
   leave: "Leave",
+  expenses: "Expenses",
   team: "Team",
   employees: "Employees",
   dashboards: "Dashboards",
@@ -16,8 +17,8 @@ export function Navigation({ role }: { role: Role }) {
       <ul className="flex gap-4 text-slate-700">
         {navigationFor(role).map((section) => (
           <li key={section}>
-            {section === "employees" ? (
-              <a href="/employees" className="underline">
+            {section === "employees" || section === "expenses" ? (
+              <a href={`/${section}`} className="underline">
                 {LABELS[section]}
               </a>
             ) : (

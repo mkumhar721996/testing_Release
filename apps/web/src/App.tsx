@@ -3,6 +3,7 @@ import { ActivatePage } from "./auth/ActivatePage";
 import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "./auth/ResetPasswordPage";
 import { SignInPage } from "./auth/SignInPage";
+import { DefectRecordPage } from "./defects/DefectRecordPage";
 import { EmployeeCreatePage } from "./employees/EmployeeCreatePage";
 import { EmployeeRecordPage } from "./employees/EmployeeRecordPage";
 import { EmployeesPage } from "./employees/EmployeesPage";
@@ -19,6 +20,8 @@ function Shell() {
   if (path === "/employees/new") return <EmployeeCreatePage />;
   const recordId = path.match(/^\/employees\/([^/]+)$/)?.[1];
   if (recordId) return <EmployeeRecordPage id={recordId} role={user.role} />;
+  const defectKey = path.match(/^\/defects\/([^/]+)$/)?.[1];
+  if (defectKey) return <DefectRecordPage defectKey={decodeURIComponent(defectKey)} />;
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50">
       <h1 className="text-2xl font-semibold text-slate-900">Web App</h1>

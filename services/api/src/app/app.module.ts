@@ -7,6 +7,7 @@ import { AccessModule } from '../access/access.module';
 import { AuditModule } from '../audit/audit.module';
 import { AuthModule } from '../auth/auth.module';
 import { DashboardsModule } from '../dashboards/dashboards.module';
+import { DefectsModule } from '../defects/defects.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { LeaveModule } from '../leave/leave.module';
 import { ShopModule } from '../shop/shop.module';
@@ -32,6 +33,7 @@ import { ShopModule } from '../shop/shop.module';
     AccessModule,
     AuditModule,
     EmployeesModule,
+    DefectsModule,
     LeaveModule,
     DashboardsModule,
     ShopModule,

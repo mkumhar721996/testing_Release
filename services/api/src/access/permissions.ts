@@ -7,7 +7,8 @@ export type Action =
   | 'dashboards:read'
   | 'admin:view'
   | 'employees:search'
-  | 'employees:create';
+  | 'employees:create'
+  | 'defects:read';
 
 export interface Actor {
   id: string;
@@ -44,7 +45,13 @@ export function can(
     case 'leave:read':
       return true;
     case 'dashboards:read':
-      return actor.role !== 'employee';
+      return (
+        actor.role === 'manager' ||
+        actor.role === 'hr_admin' ||
+        actor.role === 'read_only_executive'
+      );
+    case 'defects:read':
+      return true;
     case 'employees:search':
     case 'employees:create':
     case 'admin:view':

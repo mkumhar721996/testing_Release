@@ -1,11 +1,13 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   Patch,
+  Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +15,7 @@ import { PermissionGuard, ReadOnlyGuard } from '../access/permission.guard';
 import { Actor } from '../access/permissions';
 import { RequirePermission } from '../access/require-permission.decorator';
 import { SessionGuard } from '../auth/session.guard';
+import { EmployeeInput } from './employee-input';
 import { EmployeesService } from './employees.service';
 
 @Controller('employees')
@@ -28,6 +31,24 @@ export class EmployeesController {
     return this.employees.findById(req.actor.employeeId);
   }
 
+  @Get()
+  @RequirePermission('employees:search')
+  list(@Query('q') q?: string) {
+    return this.employees.search(typeof q === 'string' ? q : '');
+  }
+
+  @Get('options')
+  @RequirePermission('employees:search')
+  options() {
+    return this.employees.options();
+  }
+
+  @Post()
+  @RequirePermission('employees:create')
+  create(@Req() req: { actor: Actor }, @Body() body: Partial<EmployeeInput>) {
+    return this.employees.create(body, req.actor.id);
+  }
+
   @Get(':id')
   @RequirePermission('record:read')
   get(@Param('id') id: string) {
@@ -36,10 +57,13 @@ export class EmployeesController {
 
   @Patch(':id')
   @RequirePermission('record:write')
-  update(@Param('id') id: string, @Body() body: { displayName?: unknown }) {
-    if (typeof body?.displayName !== 'string' || !body.displayName.trim()) {
-      throw new BadRequestException({ code: 'display_name_invalid' });
-    }
-    return this.employees.rename(id, body.displayName.trim());
+  async update(
+    @Req() req: { actor: Actor },
+    @Param('id') id: string,
+    @Body() body: Partial<EmployeeInput>,
+  ) {
+    const updated = await this.employees.update(id, body, req.actor.id);
+    if (!updated) throw new NotFoundException({ code: 'not_found' });
+    return updated;
   }
 }

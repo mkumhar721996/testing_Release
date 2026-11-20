@@ -17,6 +17,11 @@ describe("Navigation", () => {
     expect(screen.getByText("Admin")).toBeInTheDocument();
   });
 
+  it("links an HR admin to the employee records", () => {
+    render(<Navigation role="hr_admin" />);
+    expect(screen.getByRole("link", { name: "Employees" })).toHaveAttribute("href", "/employees");
+  });
+
   it("shows Dashboards for the read-only executive (AC12)", () => {
     render(<Navigation role="read_only_executive" />);
     expect(screen.getByText("Dashboards")).toBeInTheDocument();

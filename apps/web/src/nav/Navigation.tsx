@@ -15,7 +15,15 @@ export function Navigation({ role }: { role: Role }) {
     <nav aria-label="Main">
       <ul className="flex gap-4 text-slate-700">
         {navigationFor(role).map((section) => (
-          <li key={section}>{LABELS[section]}</li>
+          <li key={section}>
+            {section === "employees" ? (
+              <a href="/employees" className="underline">
+                {LABELS[section]}
+              </a>
+            ) : (
+              LABELS[section]
+            )}
+          </li>
         ))}
       </ul>
     </nav>

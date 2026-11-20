@@ -32,7 +32,10 @@ import { SessionService } from './session.service';
     AuthService,
     ActivationService,
     PasswordResetService,
-    { provide: PASSWORD_RESET_NOTIFIER, useClass: LoggingPasswordResetNotifier },
+    {
+      provide: PASSWORD_RESET_NOTIFIER,
+      useClass: LoggingPasswordResetNotifier,
+    },
     SessionService,
     SessionGuard,
     { provide: Clock, useClass: SystemClock },

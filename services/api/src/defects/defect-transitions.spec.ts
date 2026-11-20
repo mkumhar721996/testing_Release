@@ -1,5 +1,5 @@
 import { Role } from '../auth/role';
-import { checkMove, legalMoves } from './defect-transitions';
+import { checkMove, DEFECT_MOVES, legalMoves } from './defect-transitions';
 
 describe('checkMove', () => {
   const path = [
@@ -143,6 +143,31 @@ describe('checkMove', () => {
       to: 'In Progress',
     });
     expect(checkMove('In Progress', 'fix', 'triager', {})).toEqual({
+      ok: false,
+      code: 'forbidden',
+    });
+  });
+
+  it.each(['Rejected', 'Duplicate'] as const)(
+    '%s refuses every move as illegal_transition, even for QA with full input',
+    (from) => {
+      for (const move of DEFECT_MOVES) {
+        expect(
+          checkMove(from, move, 'qa', { reason: 'r', originalKey: 'DEF-1' }),
+        ).toEqual({ ok: false, code: 'illegal_transition' });
+      }
+    },
+  );
+
+  it('names the illegal move before the role: a non-QA skip is not forbidden', () => {
+    expect(checkMove('New', 'close', 'employee', {})).toEqual({
+      ok: false,
+      code: 'illegal_transition',
+    });
+  });
+
+  it('checks the role before required fields', () => {
+    expect(checkMove('Closed', 'reopen', 'developer', {})).toEqual({
       ok: false,
       code: 'forbidden',
     });

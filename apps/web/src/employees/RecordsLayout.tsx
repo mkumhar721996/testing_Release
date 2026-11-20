@@ -3,7 +3,7 @@ import { Icon } from "./Icon";
 
 // Sidebar sections in the order the UI guidelines set. Only Records is live.
 const SECTIONS = [
-  { id: "dashboard", label: "Dashboard" },
+  { id: "dashboard", label: "Dashboard", href: "/dashboard" },
   { id: "records", label: "Records", href: "/employees" },
   { id: "tasks", label: "Tasks" },
   { id: "reports", label: "Reports" },
@@ -12,7 +12,13 @@ const SECTIONS = [
 ] as const;
 
 /** Prototype shell for the Records screens: sidebar plus slim top bar. */
-export function RecordsLayout({ children }: { children: ReactNode }) {
+export function RecordsLayout({
+  children,
+  current = "records",
+}: {
+  children: ReactNode;
+  current?: (typeof SECTIONS)[number]["id"];
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="app">
@@ -21,7 +27,9 @@ export function RecordsLayout({ children }: { children: ReactNode }) {
         <nav className="side-nav" aria-label="Main">
           {SECTIONS.map((section) =>
             "href" in section ? (
-              <a key={section.id} className="side-link" href={section.href} aria-current="page">
+              <a key={section.id} className="side-link" href={section.href}
+                aria-current={section.id === current ? "page" : undefined}
+              >
                 {section.label}
               </a>
             ) : (

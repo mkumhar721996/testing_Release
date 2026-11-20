@@ -45,4 +45,8 @@ export class Employee {
 
   @Column({ type: 'varchar', nullable: true })
   phone!: string | null;
+
+  /** Last day of employment (ISO date). Null while the employee is current. */
+  @Column({ type: 'date', nullable: true })
+  terminationDate!: string | null;
 }

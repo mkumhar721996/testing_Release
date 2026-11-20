@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: Dashboards
+  version: 1.0.0
+paths:
+  /dashboards/hr-admin:
+    get:
+      summary: Company-wide headcount and leave summary (HR admin only, no pay figures)
+      responses:
+        '200':
+          description: Aggregates across every department, as of the server date
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HrAdminDashboard' }
+        '401': { description: No session }
+        '403': { description: Not an HR admin; the body carries no figures }
+components:
+  schemas:
+    HrAdminDashboard:
+      type: object
+      required: [asOf, leaversSince, headcount, leavers12m, leaveDays, headcountByDepartment, leaveByType]
+      properties:
+        asOf: { type: string, format: date }
+        leaversSince: { type: string, format: date, description: Inclusive start of the 12-month leavers window }
+        headcount: { type: integer, description: Employees with no termination date or one after today }
+        leavers12m: { type: integer, description: Employees terminated from leaversSince to asOf inclusive }
+        leaveDays: { type: integer, description: Calendar days (inclusive) of leave starting on or before asOf }
+        headcountByDepartment:
+          type: array
+          items:
+            type: object
+            required: [department, count]
+            properties:
+              department: { type: string, description: '"Unassigned" when the employee has none' }
+              count: { type: integer }
+        leaveByType:
+          type: array
+          items:
+            type: object
+            required: [kind, days]
+            properties:
+              kind: { type: string }
+              days: { type: integer }

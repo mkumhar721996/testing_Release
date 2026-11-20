@@ -5,6 +5,7 @@ export type Action =
   | 'record:write'
   | 'leave:read'
   | 'dashboards:read'
+  | 'dashboards:hr-admin'
   | 'admin:view'
   | 'employees:search'
   | 'employees:create';
@@ -45,6 +46,7 @@ export function can(
       return true;
     case 'dashboards:read':
       return actor.role !== 'employee';
+    case 'dashboards:hr-admin':
     case 'employees:search':
     case 'employees:create':
     case 'admin:view':

@@ -80,6 +80,14 @@ describe('can', () => {
     },
   );
 
+  it('allows the team dashboard for a manager with an employee record only', () => {
+    expect(can(actor('manager'), 'dashboards:team')).toBe(true);
+    expect(can(actor('manager', null), 'dashboards:team')).toBe(false);
+    expect(can(actor('employee'), 'dashboards:team')).toBe(false);
+    expect(can(actor('hr_admin'), 'dashboards:team')).toBe(false);
+    expect(can(actor('read_only_executive'), 'dashboards:team')).toBe(false);
+  });
+
   it('allows dashboards for manager, HR admin and executive only (AC12)', () => {
     expect(can(actor('read_only_executive'), 'dashboards:read')).toBe(true);
     expect(can(actor('manager'), 'dashboards:read')).toBe(true);

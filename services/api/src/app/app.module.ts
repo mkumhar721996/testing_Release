@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { DashboardsModule } from '../dashboards/dashboards.module';
 import { EmployeesModule } from '../employees/employees.module';
 import { LeaveModule } from '../leave/leave.module';
+import { AddLeaveEntryStatus1763600000000 } from '../migrations/1763600000000-AddLeaveEntryStatus';
 import { ShopModule } from '../shop/shop.module';
 
 @Module({
@@ -24,6 +25,8 @@ import { ShopModule } from '../shop/shop.module';
         database: process.env.DB_NAME ?? 'api_service',
         autoLoadEntities: true,
         synchronize: process.env.NODE_ENV !== 'production',
+        migrations: [AddLeaveEntryStatus1763600000000],
+        migrationsRun: process.env.NODE_ENV === 'production',
         retryAttempts: 3,
         retryDelay: 1000,
       }),

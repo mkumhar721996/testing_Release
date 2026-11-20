@@ -3,6 +3,7 @@ import { ActivatePage } from "./auth/ActivatePage";
 import { ForgotPasswordPage } from "./auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "./auth/ResetPasswordPage";
 import { SignInPage } from "./auth/SignInPage";
+import { HrAdminDashboardPage } from "./dashboards/HrAdminDashboardPage";
 import { EmployeeCreatePage } from "./employees/EmployeeCreatePage";
 import { EmployeeRecordPage } from "./employees/EmployeeRecordPage";
 import { EmployeesPage } from "./employees/EmployeesPage";
@@ -15,6 +16,7 @@ function Shell() {
   if (!user) return <SignInPage />;
   const path = window.location.pathname;
   if (path === "/shop") return <ShoppingPage />;
+  if (path === "/dashboard") return <HrAdminDashboardPage role={user.role} />;
   if (path === "/employees") return <EmployeesPage />;
   if (path === "/employees/new") return <EmployeeCreatePage />;
   const recordId = path.match(/^\/employees\/([^/]+)$/)?.[1];

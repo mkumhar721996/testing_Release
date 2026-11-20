@@ -113,3 +113,16 @@ describe('employee search and create', () => {
     }
   });
 });
+
+describe('HR admin dashboard', () => {
+  it('allows dashboards:hr-admin for HR admin only (AC4)', () => {
+    expect(can(actor('hr_admin'), 'dashboards:hr-admin')).toBe(true);
+    for (const role of [
+      'employee',
+      'manager',
+      'read_only_executive',
+    ] as Role[]) {
+      expect(can(actor(role), 'dashboards:hr-admin')).toBe(false);
+    }
+  });
+});

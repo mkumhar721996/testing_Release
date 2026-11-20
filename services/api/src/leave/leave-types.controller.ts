@@ -15,6 +15,7 @@ import { Actor } from '../access/permissions';
 import { RequirePermission } from '../access/require-permission.decorator';
 import { SessionGuard } from '../auth/session.guard';
 import { LeaveTypeInput, LeaveTypesService } from './leave-types.service';
+import { uuidParam } from './uuid-param.pipe';
 
 @Controller('leave-types')
 @UseGuards(SessionGuard, ReadOnlyGuard, PermissionGuard)
@@ -36,7 +37,7 @@ export class LeaveTypesController {
   @Patch(':id')
   @RequirePermission('leave:manage')
   update(
-    @Param('id') id: string,
+    @Param('id', uuidParam('leave_type_not_found')) id: string,
     @Body() body: LeaveTypeInput,
     @Req() req: { actor: Actor },
   ) {
@@ -46,7 +47,10 @@ export class LeaveTypesController {
   @Delete(':id')
   @HttpCode(204)
   @RequirePermission('leave:manage')
-  remove(@Param('id') id: string, @Req() req: { actor: Actor }) {
+  remove(
+    @Param('id', uuidParam('leave_type_not_found')) id: string,
+    @Req() req: { actor: Actor },
+  ) {
     return this.service.remove(id, req.actor.id);
   }
 }

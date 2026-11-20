@@ -105,7 +105,7 @@ describe('LeaveBalancesService', () => {
     expect(em.save).not.toHaveBeenCalled();
   });
 
-  it.each([-1, 2.5, '3', NaN, undefined])('rejects days %p', async (days) => {
+  it.each([-1, 2.5, '3', NaN, undefined, 2147483648, 1e10])('rejects days %p', async (days) => {
     const { service, em } = setup();
     await expect(
       service.set('e1', 'annual', days as number, 'u1'),

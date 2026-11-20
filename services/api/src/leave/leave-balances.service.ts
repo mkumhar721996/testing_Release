@@ -10,6 +10,9 @@ import { Employee } from '../employees/employee.entity';
 import { LeaveBalance } from './leave-balance.entity';
 import { LeaveType } from './leave-type.entity';
 
+// Postgres `int` upper bound; larger values would overflow the column.
+const MAX_BALANCE_DAYS = 2147483647;
+
 export interface BalanceRow {
   leaveTypeId: string;
   name: string;
@@ -49,7 +52,12 @@ export class LeaveBalancesService {
     days: number,
     actorUserId: string,
   ): Promise<{ leaveTypeId: string; days: number }> {
-    if (typeof days !== 'number' || !Number.isInteger(days) || days < 0) {
+    if (
+      typeof days !== 'number' ||
+      !Number.isInteger(days) ||
+      days < 0 ||
+      days > MAX_BALANCE_DAYS
+    ) {
       throw new BadRequestException({ code: 'balance_invalid' });
     }
     await this.dataSource.transaction(async (em) => {

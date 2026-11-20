@@ -28,6 +28,17 @@ export type ManagerOption = {
   isExecutive: boolean;
 };
 
+/** A direct report as a manager sees it: work details only, never pay. */
+export type DirectReport = {
+  id: string;
+  displayName: string;
+  jobTitle: string | null;
+  department: string | null;
+  managerName: string;
+  contactEmail: string | null;
+  phone: string | null;
+};
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

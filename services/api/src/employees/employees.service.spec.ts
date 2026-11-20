@@ -129,6 +129,28 @@ describe('EmployeesService', () => {
     expect(repo.findOneBy).not.toHaveBeenCalled();
   });
 
+  it('lists only the manager’s own current reports, work details only', async () => {
+    const { service, qb: base } = setup();
+    const qb = Object.assign(base, {
+      innerJoin: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([{ id: 'r1' }]),
+    });
+    await expect(service.directReports('m1')).resolves.toEqual([{ id: 'r1' }]);
+    expect(qb.where).toHaveBeenCalledWith('e."managerId" = :managerEmployeeId', {
+      managerEmployeeId: 'm1',
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('e."leftAt" IS NULL');
+    expect(qb.orderBy).toHaveBeenCalledWith('e."displayName"', 'ASC');
+    const selected = JSON.stringify([
+      qb.select.mock.calls,
+      qb.addSelect.mock.calls,
+    ]);
+    expect(selected).not.toMatch(/pay/i);
+  });
+
   it('replaces the manager outright on update (AC6)', async () => {
     const { service, manager } = setup();
     await service.update('e1', { managerId: boss }, 'actor1');

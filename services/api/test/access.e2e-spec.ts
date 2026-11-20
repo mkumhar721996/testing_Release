@@ -123,6 +123,15 @@ describe('Role-based access (e2e)', () => {
     await agent.get(`/employees/${stranger.employee.id}`).expect(403);
   });
 
+  it('refuses direct reports to an employee and an HR admin', async () => {
+    for (const role of ['employee', 'hr_admin'] as const) {
+      const person = await makePerson(role);
+      const agent = await signedIn(person.user.email);
+      const res = await agent.get('/employees/direct-reports').expect(403);
+      expect(res.body).toMatchObject({ code: 'forbidden' });
+    }
+  });
+
   it('shows an HR admin any record (AC5)', async () => {
     const admin = await makePerson('hr_admin');
     const other = await makePerson('employee');

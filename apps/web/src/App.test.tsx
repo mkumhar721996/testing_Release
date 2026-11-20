@@ -4,8 +4,10 @@ import userEvent from "@testing-library/user-event";
 import App from "./App";
 import * as client from "./auth/authClient";
 
+import * as employeesClient from "./employees/employeesClient";
 import * as shopClient from "./shop/shopClient";
 
+vi.mock("./employees/employeesClient");
 vi.mock("./auth/authClient");
 vi.mock("./shop/shopClient");
 
@@ -28,6 +30,14 @@ describe("App", () => {
     await userEvent.click(screen.getByRole("button", { name: /reset password/i }));
     expect(client.resetPassword).toHaveBeenCalledWith("abc", "new-password");
   });
+  it("renders the direct reports page for a manager at /direct-reports", async () => {
+    vi.mocked(client.getSession).mockResolvedValue({ email: "dan@example.com", role: "manager" });
+    vi.mocked(employeesClient.getDirectReports).mockResolvedValue([]);
+    window.history.pushState({}, "", "/direct-reports");
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "My direct reports" })).toBeInTheDocument();
+  });
+
   it("shows the sign-in form when signed out", async () => {
     vi.mocked(client.getSession).mockResolvedValue(null);
     render(<App />);

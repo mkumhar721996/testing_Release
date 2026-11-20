@@ -13,6 +13,16 @@ export type Employee = {
 };
 
 export type ManagerOption = { id: string; displayName: string; isExecutive: boolean };
+/** A direct report as the manager sees them: work details only, no pay. */
+export type DirectReport = {
+  id: string;
+  displayName: string;
+  jobTitle: string | null;
+  department: string | null;
+  managerName: string;
+  contactEmail: string | null;
+  phone: string | null;
+};
 export type EmployeeOptions = { departments: string[]; managers: ManagerOption[] };
 
 export type EmployeeInput = {
@@ -45,6 +55,12 @@ export async function getEmployee(id: string): Promise<Employee> {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Could not load the employee record.");
+  return res.json();
+}
+
+export async function getDirectReports(): Promise<DirectReport[]> {
+  const res = await fetch(`${base()}/employees/direct-reports`, { credentials: "include" });
+  if (!res.ok) throw new Error("Could not load your direct reports.");
   return res.json();
 }
 

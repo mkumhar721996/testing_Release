@@ -112,4 +112,12 @@ describe('employee search and create', () => {
       expect(can(actor(role), 'employees:create')).toBe(false);
     }
   });
+
+  it('lets only a manager with an Employee read their direct reports', () => {
+    expect(can(actor('manager', 'm1'), 'reports:read')).toBe(true);
+    expect(can(actor('manager', null), 'reports:read')).toBe(false);
+    expect(can(actor('employee'), 'reports:read')).toBe(false);
+    expect(can(actor('hr_admin'), 'reports:read')).toBe(false);
+    expect(can(actor('read_only_executive'), 'reports:read')).toBe(false);
+  });
 });

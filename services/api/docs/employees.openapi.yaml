@@ -51,6 +51,28 @@ paths:
                         id: { type: string, format: uuid }
                         displayName: { type: string }
                         isExecutive: { type: boolean }
+  /employees/direct-reports:
+    get:
+      summary: The signed-in manager's direct reports (manager only, view only)
+      description: Employees whose manager is the caller and who have not left. One level only; work details only, no pay.
+      responses:
+        '200':
+          description: Direct reports ordered by name; empty when there are none
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string, format: uuid }
+                    displayName: { type: string }
+                    jobTitle: { type: string, nullable: true }
+                    department: { type: string, nullable: true }
+                    managerName: { type: string }
+                    contactEmail: { type: string, nullable: true }
+                    phone: { type: string, nullable: true }
+        '403': { description: Not a manager }
   /employees/{id}:
     parameters:
       - { name: id, in: path, required: true, schema: { type: string, format: uuid } }

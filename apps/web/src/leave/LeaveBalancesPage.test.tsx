@@ -84,6 +84,44 @@ describe("LeaveBalancesPage", () => {
     expect(within(rowOf("Annual leave")).getByText("0 days")).toBeInTheDocument();
   });
 
+  it("writes 1 day in the singular and 0 days as a real balance", async () => {
+    vi.mocked(client.setBalance).mockImplementation(async (_e, id, days) =>
+      ok({ leaveTypeId: id, days }),
+    );
+    render(<LeaveBalancesPage role="hr_admin" />);
+    await choosePriya();
+    await save("Set Annual leave balance for Priya Raman", "1");
+    expect(await screen.findByText("1 day")).toBeInTheDocument();
+    await save("Set Sick leave balance for Priya Raman", "0");
+    expect(await within(rowOf("Sick leave")).findByText("0 days")).toBeInTheDocument();
+    expect(client.setBalance).toHaveBeenLastCalledWith("e1", "sick", 0);
+  });
+
+  it("keeps the balance unchanged when the API rejects the days", async () => {
+    vi.mocked(client.setBalance).mockResolvedValue({
+      ok: false,
+      reason: "invalid",
+      code: "balance_invalid",
+      message: "x",
+    });
+    render(<LeaveBalancesPage role="hr_admin" />);
+    await choosePriya();
+    await save("Set Annual leave balance for Priya Raman", "5");
+    expect(await screen.findByText("Enter a whole number of days, 0 or more.")).toBeInTheDocument();
+    expect(within(rowOf("Annual leave")).getByText("Not set")).toBeInTheDocument();
+  });
+
+  it("offers a way back to leave types when none exist", async () => {
+    vi.mocked(client.listBalances).mockResolvedValue(ok([]));
+    render(<LeaveBalancesPage role="hr_admin" />);
+    await choosePriya();
+    expect(await screen.findByText("No leave types to set balances for")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Go to leave types" })).toHaveAttribute(
+      "href",
+      "/admin/leave-types",
+    );
+  });
+
   it("shows a refusal when the API says forbidden (AC5)", async () => {
     vi.mocked(client.setBalance).mockResolvedValue({
       ok: false,

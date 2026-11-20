@@ -116,6 +116,33 @@ describe("LeaveTypesPage", () => {
     expect(screen.queryByRole("cell", { name: "Unpaid leave" })).toBeNull();
   });
 
+  it("closes the modal on Esc without calling the API", async () => {
+    render(<LeaveTypesPage role="hr_admin" />);
+    await userEvent.click(await screen.findByRole("button", { name: "New leave type" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(client.createLeaveType).not.toHaveBeenCalled();
+  });
+
+  it("returns focus to the Edit button after the modal closes", async () => {
+    render(<LeaveTypesPage role="hr_admin" />);
+    const edit = await screen.findByRole("button", { name: "Edit Annual leave" });
+    await userEvent.click(edit);
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(edit).toHaveFocus();
+  });
+
+  it("offers Close instead of Delete once deletion is refused", async () => {
+    vi.mocked(client.deleteLeaveType).mockResolvedValue(refused("conflict", "leave_type_in_use"));
+    render(<LeaveTypesPage role="hr_admin" />);
+    await userEvent.click(await screen.findByRole("button", { name: "Delete Annual leave" }));
+    await userEvent.click(screen.getByRole("button", { name: "Delete leave type" }));
+    await screen.findByText(/Deletion refused/);
+    expect(screen.queryByRole("button", { name: "Delete leave type" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
+  });
+
   it("shows the empty and error states", async () => {
     vi.mocked(client.listLeaveTypes).mockResolvedValueOnce(ok([]));
     const { unmount } = render(<LeaveTypesPage role="hr_admin" />);

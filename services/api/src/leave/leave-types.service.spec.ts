@@ -90,6 +90,32 @@ describe('LeaveTypesService', () => {
     ).rejects.toMatchObject({ response: { code: 'leave_type_name_taken' } });
   });
 
+  it('allows changing only the case of its own name', async () => {
+    const { service, em } = setup();
+    await service.update('annual', { name: 'ANNUAL LEAVE' }, 'u1');
+    expect(em.save).toHaveBeenCalledWith(
+      LeaveType,
+      expect.objectContaining({ id: 'annual', name: 'ANNUAL LEAVE' }),
+    );
+  });
+
+  it('rejects a blank rename and a non-boolean exempt on update', async () => {
+    const { service, em } = setup();
+    await expect(service.update('annual', { name: ' ' }, 'u1')).rejects.toMatchObject({
+      response: { code: 'leave_type_name_invalid' },
+    });
+    await expect(
+      service.update('annual', { exempt: 1 as unknown as boolean }, 'u1'),
+    ).rejects.toMatchObject({ response: { code: 'leave_type_exempt_invalid' } });
+    expect(em.save).not.toHaveBeenCalled();
+  });
+
+  it('writes no audit entry when a delete is refused', async () => {
+    const { service, em } = setup({ entries: 1 });
+    await expect(service.remove('annual', 'u1')).rejects.toBeDefined();
+    expect(em.save).not.toHaveBeenCalled();
+  });
+
   it('answers 404 for an unknown leave type', async () => {
     const { service } = setup();
     await expect(service.update('nope', { exempt: true }, 'u1')).rejects.toMatchObject(

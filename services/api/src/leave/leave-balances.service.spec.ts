@@ -1,5 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
 import { AuditEntry } from '../audit/audit-entry.entity';
+import { Employee } from '../employees/employee.entity';
 import { LeaveBalance } from './leave-balance.entity';
 import { LeaveBalancesService } from './leave-balances.service';
 import { LeaveType } from './leave-type.entity';
@@ -74,6 +75,34 @@ describe('LeaveBalancesService', () => {
         changes: expect.objectContaining({ days: 7, previousDays: 10 }),
       }),
     );
+  });
+
+  it('accepts 0 as a real balance', async () => {
+    const { service, em } = setup();
+    await expect(service.set('e1', 'sick', 0, 'u1')).resolves.toEqual({
+      leaveTypeId: 'sick',
+      days: 0,
+    });
+    expect(em.upsert).toHaveBeenCalledWith(
+      LeaveBalance,
+      { employeeId: 'e1', leaveTypeId: 'sick', days: 0 },
+      ['employeeId', 'leaveTypeId'],
+    );
+  });
+
+  it.each([
+    ['employee', 'employee_not_found'],
+    ['type', 'leave_type_not_found'],
+  ])('answers 404 and writes nothing for an unknown %s', async (which, code) => {
+    const { service, em } = setup();
+    em.existsBy.mockImplementation(async (entity: unknown) =>
+      which === 'employee' ? entity !== Employee : entity !== LeaveType,
+    );
+    await expect(service.set('e1', 'annual', 5, 'u1')).rejects.toMatchObject({
+      response: { code },
+    });
+    expect(em.upsert).not.toHaveBeenCalled();
+    expect(em.save).not.toHaveBeenCalled();
   });
 
   it.each([-1, 2.5, '3', NaN, undefined])('rejects days %p', async (days) => {

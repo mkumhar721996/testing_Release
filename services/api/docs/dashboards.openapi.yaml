@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: Dashboards
+  version: 1.0.0
+paths:
+  /dashboards/executive:
+    get:
+      summary: Company-wide headcount and leave totals (read-only executive only)
+      responses:
+        '200':
+          description: Aggregate counts only; no names, pay or ids
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecutiveSummary' }
+        '401': { description: Not signed in }
+        '403': { description: Not the read-only executive }
+components:
+  schemas:
+    ExecutiveSummary:
+      type: object
+      required: [headcount, leaveDaysTaken, leaveYear, hasData]
+      properties:
+        headcount: { type: integer, description: Number of employees }
+        leaveDaysTaken:
+          type: integer
+          description: Calendar days of leave taken, 1 Jan of the current year up to today, all leave kinds
+        leaveYear:
+          type: object
+          required: [from, to]
+          properties:
+            from: { type: string, format: date }
+            to: { type: string, format: date }
+        hasData: { type: boolean, description: False when there are no employees and no leave }

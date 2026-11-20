@@ -22,6 +22,17 @@ describe("Navigation", () => {
     expect(screen.getByRole("link", { name: "Employees" })).toHaveAttribute("href", "/employees");
   });
 
+  it("links the executive to the executive dashboard", () => {
+    render(<Navigation role="read_only_executive" />);
+    expect(screen.getByRole("link", { name: "Dashboards" })).toHaveAttribute("href", "/dashboards/executive");
+  });
+
+  it.each<Role>(["manager", "hr_admin"])("shows %s a plain Dashboards label", (role) => {
+    render(<Navigation role={role} />);
+    expect(screen.getByText("Dashboards")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Dashboards" })).toBeNull();
+  });
+
   it("shows Dashboards for the read-only executive (AC12)", () => {
     render(<Navigation role="read_only_executive" />);
     expect(screen.getByText("Dashboards")).toBeInTheDocument();

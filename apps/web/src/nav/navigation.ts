@@ -7,6 +7,9 @@ const SECTIONS: Record<Role, Section[]> = {
   manager: ["profile", "leave", "team", "dashboards"],
   hr_admin: ["profile", "leave", "employees", "dashboards", "admin"],
   read_only_executive: ["profile", "leave", "dashboards"],
+  triager: ["profile", "leave"],
+  developer: ["profile", "leave"],
+  qa: ["profile", "leave"],
 };
 
 /** Convenience layer only: the API enforces access. */

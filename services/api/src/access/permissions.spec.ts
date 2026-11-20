@@ -113,3 +113,12 @@ describe('employee search and create', () => {
     }
   });
 });
+
+describe('defect roles', () => {
+  it('lets every role read defects and keeps dashboards from defect roles', () => {
+    for (const role of ['qa', 'triager', 'developer'] as Role[]) {
+      expect(can(actor(role), 'defects:read')).toBe(true);
+      expect(can(actor(role), 'dashboards:read')).toBe(false);
+    }
+  });
+});

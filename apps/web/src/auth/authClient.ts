@@ -1,6 +1,13 @@
 const base = () => import.meta.env.VITE_API_BASE_URL ?? "";
 
-export type Role = "employee" | "manager" | "hr_admin" | "read_only_executive";
+export type Role =
+  | "employee"
+  | "manager"
+  | "hr_admin"
+  | "read_only_executive"
+  | "triager"
+  | "developer"
+  | "qa";
 export type SessionUser = { email: string; role: Role };
 
 export type SignInResult = { ok: true } | { ok: false; message: string };

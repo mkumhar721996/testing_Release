@@ -24,6 +24,10 @@ describe("navigationFor", () => {
     }
   });
 
+  it.each<Role>(["qa", "triager", "developer"])("lists only profile and leave for %s", (role) => {
+    expect(navigationFor(role)).toEqual(["profile", "leave"]);
+  });
+
   it("hides dashboards from employees and the team from non-managers", () => {
     expect(navigationFor("employee")).not.toContain("dashboards");
     expect(navigationFor("manager")).toContain("team");

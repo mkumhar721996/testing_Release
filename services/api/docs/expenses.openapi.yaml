@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Expenses
+  version: 1.0.0
+paths:
+  /expenses/options:
+    get:
+      summary: Choices and limits for the new-expense form
+      responses:
+        '200':
+          description: Configured categories, currency and limits
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [categories, currency, maxReceiptBytes, windowDays]
+                properties:
+                  categories: { type: array, items: { type: string } }
+                  currency: { type: string }
+                  maxReceiptBytes: { type: integer }
+                  windowDays: { type: integer }
+        '403': { description: Not allowed to record expenses }
+  /expenses:
+    post:
+      summary: Save an expense as a draft (only amount and date are required)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [amount, date]
+              properties:
+                amount: { type: number, exclusiveMinimum: 0 }
+                date: { type: string, format: date, description: Not in the future and at most 60 days ago }
+                category: { type: string }
+                description: { type: string }
+                receipt: { type: string, format: binary, description: PDF, JPG or PNG of at most 10 MB }
+      responses:
+        '201':
+          description: Draft saved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Expense' }
+        '400':
+          description: Rejected, nothing saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    enum:
+                      - amount_invalid
+                      - date_invalid
+                      - date_in_future
+                      - date_too_old
+                      - category_invalid
+                      - receipt_type_invalid
+                      - receipt_too_large
+        '403': { description: Not allowed to record expenses }
+components:
+  schemas:
+    Expense:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ownerUserId: { type: string, format: uuid }
+        amountMinor: { type: integer }
+        currency: { type: string }
+        incurredOn: { type: string, format: date }
+        category: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        receiptKey: { type: string, nullable: true }
+        receiptName: { type: string, nullable: true }
+        receiptContentType: { type: string, nullable: true }
+        receiptSizeBytes: { type: integer, nullable: true }
+        status: { type: string, enum: [draft] }

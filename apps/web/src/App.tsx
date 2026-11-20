@@ -7,6 +7,7 @@ import { DirectReportsPage } from "./employees/DirectReportsPage";
 import { EmployeeCreatePage } from "./employees/EmployeeCreatePage";
 import { EmployeeRecordPage } from "./employees/EmployeeRecordPage";
 import { EmployeesPage } from "./employees/EmployeesPage";
+import { ExpensesPage } from "./expenses/ExpensesPage";
 import { Navigation } from "./nav/Navigation";
 import { ShoppingPage } from "./shop/ShoppingPage";
 
@@ -18,6 +19,7 @@ function Shell() {
   if (path === "/shop") return <ShoppingPage />;
   if (path === "/employees") return <EmployeesPage />;
   if (path === "/direct-reports") return <DirectReportsPage />;
+  if (path === "/expenses") return <ExpensesPage />;
   if (path === "/employees/new") return <EmployeeCreatePage />;
   const recordId = path.match(/^\/employees\/([^/]+)$/)?.[1];
   if (recordId) return <EmployeeRecordPage id={recordId} role={user.role} />;

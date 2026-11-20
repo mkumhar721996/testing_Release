@@ -4,6 +4,7 @@ import { navigationFor, type Section } from "./navigation";
 const LABELS: Record<Section, string> = {
   profile: "Profile",
   leave: "Leave",
+  expenses: "Expenses",
   team: "Team",
   employees: "Employees",
   dashboards: "Dashboards",
@@ -13,6 +14,7 @@ const LABELS: Record<Section, string> = {
 const LINKS: Partial<Record<Section, string>> = {
   employees: "/employees",
   team: "/direct-reports",
+  expenses: "/expenses",
 };
 
 export function Navigation({ role }: { role: Role }) {

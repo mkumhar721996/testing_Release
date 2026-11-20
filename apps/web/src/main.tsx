@@ -4,6 +4,7 @@ import App from "./App";
 import "./index.css";
 import "./employees/records.css";
 import "./dashboards/dashboard.css";
+import "./expenses/expenses.css";
 
 const container = document.getElementById("root");
 if (!container) {

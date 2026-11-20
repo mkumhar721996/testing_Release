@@ -124,3 +124,14 @@ describe('executive dashboard', () => {
     }
   });
 });
+
+describe('expenses:write', () => {
+  it('lets a linked employee record expenses', () => {
+    expect(can(actor('employee'), 'expenses:write')).toBe(true);
+  });
+
+  it('refuses the read-only executive and users without an employee', () => {
+    expect(can(actor('read_only_executive'), 'expenses:write')).toBe(false);
+    expect(can(actor('employee', null), 'expenses:write')).toBe(false);
+  });
+});

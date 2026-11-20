@@ -8,6 +8,7 @@ import { AuditModule } from '../audit/audit.module';
 import { AuthModule } from '../auth/auth.module';
 import { DashboardsModule } from '../dashboards/dashboards.module';
 import { EmployeesModule } from '../employees/employees.module';
+import { ExpensesModule } from '../expenses/expenses.module';
 import { LeaveModule } from '../leave/leave.module';
 import { ShopModule } from '../shop/shop.module';
 
@@ -32,6 +33,7 @@ import { ShopModule } from '../shop/shop.module';
     AccessModule,
     AuditModule,
     EmployeesModule,
+    ExpensesModule,
     LeaveModule,
     DashboardsModule,
     ShopModule,

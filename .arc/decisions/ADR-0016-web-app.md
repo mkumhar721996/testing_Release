@@ -2,8 +2,8 @@
 id: ADR-0016
 category: component
 title: Web App
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0034
 component_id: comp_web_app
 responsibility: Browser-based React UI for End Users and Administrators with role-based
   views
@@ -19,7 +19,9 @@ talks_to:
   evidence: Login redirect flow
 rule: The Web App reaches business data only through the API Service and authenticates
   users only through the Identity Provider.
-evidence: 'Codebase scan: apps/web (React, index.html entry)'
+evidence:
+- type: note
+  ref: 'Codebase scan: apps/web (React, index.html entry)'
 ---
 
 ## Context

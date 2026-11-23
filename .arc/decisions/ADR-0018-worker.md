@@ -2,8 +2,8 @@
 id: ADR-0018
 category: component
 title: Worker
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0036
 component_id: comp_worker
 responsibility: 'Background jobs consumed from the Job Queue: notification delivery,
   report generation, document processing'
@@ -22,7 +22,9 @@ talks_to:
   evidence: Worker generates documents
 rule: Background and long-running work runs in the Worker via the Job Queue, never
   inside API request handling.
-evidence: 'Codebase scan: services/worker'
+evidence:
+- type: note
+  ref: 'Codebase scan: services/worker'
 ---
 
 ## Context

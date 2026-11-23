@@ -2,8 +2,8 @@
 id: ADR-0017
 category: component
 title: API Service
-status: accepted
-superseded_by: null
+status: superseded
+superseded_by: ADR-0035
 component_id: comp_api_service
 responsibility: 'NestJS backend: authorization/RBAC, business record CRUD, workflow,
   search, reporting, audit logging, document metadata, inbound API and outbound webhooks'
@@ -24,7 +24,9 @@ talks_to:
   evidence: API validates tokens
 rule: Business records and audit logs are written only through the API Service; clients
   and the Worker never bypass its authorization rules.
-evidence: 'Codebase scan: services/api (NestJS, src/main.ts starts a server)'
+evidence:
+- type: note
+  ref: 'Codebase scan: services/api (NestJS, src/main.ts starts a server)'
 ---
 
 ## Context
